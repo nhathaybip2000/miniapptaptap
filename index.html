@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>CatCoin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <p id="greeting">Đang tải thông tin người dùng...</p>
+        <img src="assets/paw-icon.png" class="logo-icon" />
+      </div>      
+    </header>
+
+    <section class="balance">
+      <p>Your Balance</p>
+      <h2>
+        <img src="assets/coin.png" class="coin-icon" />
+        <span id="coin-count">24</span>
+      </h2>
+    </section>
+
+    <div class="pet">
+      <!-- Gán ID để xử lý click -->
+      <img src="assets/pet.png" alt="Pet" id="big-coin">
+    </div>
+
+    <div class="energy-bar">
+      <span>⚡</span>
+      <div class="bar">
+        <div class="fill" style="width: 96.4%;"></div>
+      </div>
+      <span class="label">482 / 500</span>
+    </div>
+
+    <nav class="menu">
+      <button>
+        <img src="assets/khaithac.png" class="icon">
+        <span>Khai Thác</span>
+      </button>    
+      <button>
+        <img src="assets/nhiemvu.png" class="icon">
+        <span>Nhiệm Vụ</span>
+      </button>
+      <button>
+        <img src="assets/moibanbe.png" class="icon">
+        <span>Mời Bạn Bè</span>
+      </button>
+      <button>
+        <img src="assets/vi.png" class="icon">
+        <span>Tài Khoản</span>
+      </button>
+    </nav>
+  </div>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
