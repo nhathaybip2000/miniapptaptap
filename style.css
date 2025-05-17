@@ -9,11 +9,25 @@ body {
   font-family: 'Fredoka', sans-serif;
   color: white;
 }
+html, body {
+  height: 100%;
+  margin: 0;
+}
 
 .container {
-  max-width: 400px;
-  margin: auto;
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.menu {
+  margin-top: auto; /* đẩy xuống dưới */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 header {
@@ -112,7 +126,7 @@ header {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  margin-top: 2rem;
+  margin-top: auto; /* đẩy xuống dưới */
 }
 
 .menu button {
