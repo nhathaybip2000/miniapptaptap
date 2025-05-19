@@ -9,7 +9,7 @@ if (user) {
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
 
   // Gửi thông tin người dùng về backend để lưu vào Supabase
-  fetch('/api/getUser', {
+  fetch('https://coinxutaptap.vercel.app/api/getUser', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
