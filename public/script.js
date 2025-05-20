@@ -6,12 +6,22 @@ const user = tg.initDataUnsafe?.user;
 let coin = 0;
 let energy = 0;
 const maxEnergy = 500;
+let lastTapAt = null;
 
-// DOM elements
 const coinCountEl = document.getElementById('coin-count');
 const energyFillEl = document.querySelector('.fill');
 const energyLabelEl = document.querySelector('.label');
 const bigCoinEl = document.getElementById('big-coin');
+
+// Tính lại năng lượng dựa trên thời gian
+function calculateEnergy(lastTime) {
+  if (!lastTime) return maxEnergy;
+  const now = Date.now();
+  const last = new Date(lastTime).getTime();
+  const elapsed = now - last;
+  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút
+  return Math.floor(maxEnergy * percent);
+}
 
 function updateUI() {
   coinCountEl.textContent = coin;
@@ -24,7 +34,6 @@ if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
 
-  // Gửi và lấy dữ liệu từ Supabase
   fetch('/api/getUser', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -37,17 +46,21 @@ if (user) {
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
-      energy = data.energy;
+      lastTapAt = data.last_tap_at;
+      energy = calculateEnergy(lastTapAt);
       updateUI();
     })
     .catch(err => {
-      console.error('Lỗi khi lấy thông tin user:', err);
+      console.error('Lỗi khi lấy user:', err);
     });
 } else {
   document.getElementById('greeting').textContent = 'Không thể lấy thông tin người dùng.';
 }
 
-// Xử lý khi click vào thú
+// Gộp nhiều lần tap
+let pendingTaps = 0;
+let debounceTimeout = null;
+
 bigCoinEl.addEventListener('click', () => {
   if (energy <= 0) {
     tg.HapticFeedback.notificationOccurred('error');
@@ -55,33 +68,42 @@ bigCoinEl.addEventListener('click', () => {
     return;
   }
 
-  fetch('/api/tap', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: user.id })
-  })
-    .then(res => res.json())
-    .then(data => {
-      coin = data.coin;
-      energy = data.energy;
-      updateUI();
+  coin++;
+  energy--;
+  pendingTaps++;
+  updateUI();
 
-      // Rung nhẹ hình
-      bigCoinEl.classList.add('shake');
-      setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
+  // Rung và hiệu ứng
+  bigCoinEl.classList.add('shake');
+  setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
 
-      // Hiệu ứng +1
-      const plusOne = document.createElement('div');
-      plusOne.textContent = '+1';
-      plusOne.className = 'plus-one';
-      plusOne.style.position = 'absolute';
-      const rect = bigCoinEl.getBoundingClientRect();
-      plusOne.style.left = rect.left + rect.width / 2 + 'px';
-      plusOne.style.top = rect.top + 'px';
-      document.body.appendChild(plusOne);
-      setTimeout(() => plusOne.remove(), 1000);
+  const plusOne = document.createElement('div');
+  plusOne.textContent = '+1';
+  plusOne.className = 'plus-one';
+  plusOne.style.position = 'absolute';
+  const rect = bigCoinEl.getBoundingClientRect();
+  plusOne.style.left = rect.left + rect.width / 2 + 'px';
+  plusOne.style.top = rect.top + 'px';
+  document.body.appendChild(plusOne);
+  setTimeout(() => plusOne.remove(), 1000);
+
+  // Gửi sau 1s (gộp nhiều lần tap)
+  clearTimeout(debounceTimeout);
+  debounceTimeout = setTimeout(() => {
+    fetch('/api/tap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: user.id, count: pendingTaps })
     })
-    .catch(err => {
-      console.error('Lỗi khi Tap:', err);
-    });
+      .then(res => res.json())
+      .then(data => {
+        coin = data.coin;
+        lastTapAt = data.last_tap_at;
+        energy = calculateEnergy(lastTapAt);
+        updateUI();
+      })
+      .catch(err => console.error('Lỗi khi gửi tap:', err));
+
+    pendingTaps = 0;
+  }, 1000);
 });

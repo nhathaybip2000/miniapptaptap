@@ -1,3 +1,4 @@
+// api/tap.js
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -6,41 +7,33 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).end();
 
-  const { id } = req.body;
+  const { id, count } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: 'Thiếu ID người dùng' });
-  }
+  if (!id || !count) return res.status(400).json({ error: 'Thiếu id hoặc count' });
 
-  const { data: user, error: getError } = await supabase
+  const { data: user, error } = await supabase
     .from('users')
-    .select('*')
+    .select('coin')
     .eq('id', id)
     .single();
 
-  if (getError || !user) {
-    return res.status(404).json({ error: 'User not found' });
+  if (error || !user) {
+    return res.status(404).json({ error: 'Không tìm thấy user' });
   }
 
-  if (user.energy <= 0) {
-    return res.status(400).json({ error: 'Hết năng lượng' });
-  }
-
-  const newCoin = user.coin + 1;
-  const newEnergy = user.energy - 1;
+  const newCoin = user.coin + count;
+  const now = new Date().toISOString();
 
   const { error: updateError } = await supabase
     .from('users')
-    .update({ coin: newCoin, energy: newEnergy })
+    .update({ coin: newCoin, last_tap_at: now })
     .eq('id', id);
 
   if (updateError) {
-    return res.status(500).json({ error: updateError.message });
+    return res.status(500).json({ error: 'Lỗi khi cập nhật coin' });
   }
 
-  return res.status(200).json({ coin: newCoin, energy: newEnergy });
+  res.status(200).json({ coin: newCoin, last_tap_at: now });
 }
