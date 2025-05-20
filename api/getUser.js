@@ -1,36 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const { id, name, coin } = req.body;
+  const { id, first_name, username } = req.body;
 
-    const { error } = await supabase
-      .from('users')
-      .upsert({ id, name, coin }); // Thêm mới hoặc cập nhật
+  const { data: existing } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-    if (error) return res.status(500).json({ error: error.message });
+  if (existing) return res.status(200).json(existing);
 
-    return res.status(200).json({ message: 'Lưu thành công' });
-  }
+  const { data, error } = await supabase
+    .from('users')
+    .insert([{ id, first_name, username }])
+    .select()
+    .single();
 
-  if (req.method === 'GET') {
-    const { id } = req.query;
+  if (error) return res.status(500).json({ error: error.message });
 
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) return res.status(404).json({ error: 'Không tìm thấy user' });
-
-    return res.status(200).json(data);
-  }
-
-  res.status(405).end();
+  res.status(200).json(data);
 }
