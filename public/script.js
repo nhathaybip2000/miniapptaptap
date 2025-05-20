@@ -24,7 +24,7 @@ if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
 
-  // Gửi user và lấy dữ liệu coin/energy từ Supabase
+  // Gửi và lấy dữ liệu từ Supabase
   fetch('/api/getUser', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -44,11 +44,10 @@ if (user) {
       console.error('Lỗi khi lấy thông tin user:', err);
     });
 } else {
-  document.getElementById('greeting').textContent =
-    'Không thể lấy thông tin người dùng.';
+  document.getElementById('greeting').textContent = 'Không thể lấy thông tin người dùng.';
 }
 
-// Xử lý khi click vào thú (TapTap)
+// Xử lý khi click vào thú
 bigCoinEl.addEventListener('click', () => {
   if (energy <= 0) {
     tg.HapticFeedback.notificationOccurred('error');
@@ -67,7 +66,7 @@ bigCoinEl.addEventListener('click', () => {
       energy = data.energy;
       updateUI();
 
-      // Rung hình
+      // Rung nhẹ hình
       bigCoinEl.classList.add('shake');
       setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
 
