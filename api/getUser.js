@@ -1,25 +1,37 @@
-import { createClient } from '@supabase/supabase-js';
+// /api/getUser.js
+const express = require('express');
+const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-export default async function handler(req, res) {
-  const { id, first_name, username } = req.body;
+router.post('/', async (req, res) => {
+  const { id, username, first_name } = req.body;
 
-  const { data: existing } = await supabase
+  // Kiểm tra nếu user đã có
+  let { data, error } = await supabase
     .from('users')
-    .select('*')
+    .select('coin, energy')
     .eq('id', id)
     .single();
 
-  if (existing) return res.status(200).json(existing);
+  // Nếu chưa có thì tạo mới
+  if (error && error.code === 'PGRST116') {
+    const { data: newUser } = await supabase
+      .from('users')
+      .insert({ id, username, first_name, coin: 0, energy: 500 })
+      .select('coin, energy')
+      .single();
 
-  const { data, error } = await supabase
-    .from('users')
-    .insert([{ id, first_name, username }])
-    .select()
-    .single();
+    return res.json(newUser);
+  }
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    console.error('Lỗi Supabase:', error);
+    return res.status(500).json({ coin: 0, energy: 0 });
+  }
 
-  res.status(200).json(data);
-}
+  res.json(data);
+});
+
+module.exports = router;
