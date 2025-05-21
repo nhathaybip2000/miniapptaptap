@@ -13,16 +13,16 @@ const energyFillEl = document.querySelector('.fill');
 const energyLabelEl = document.querySelector('.label');
 const bigCoinEl = document.getElementById('big-coin');
 
-// Tính lại năng lượng dựa trên thời gian
+// 🔁 Tính lại năng lượng dựa trên thời gian
 function calculateEnergy(lastTime) {
-  if (!lastTime) return 500;
+  if (!lastTime) return maxEnergy;
   const now = Date.now();
   const last = new Date(lastTime).getTime();
   const elapsed = now - last;
-  return Math.min(500, Math.floor(500 * (elapsed / (30 * 60 * 1000))));
+  return Math.min(maxEnergy, Math.floor(maxEnergy * (elapsed / (30 * 60 * 1000))));
 }
 
-
+// 🧠 Cập nhật UI thật
 function updateUI() {
   coinCountEl.textContent = coin;
   const percent = (energy / maxEnergy) * 100;
@@ -30,6 +30,18 @@ function updateUI() {
   energyLabelEl.textContent = `${energy} / ${maxEnergy}`;
 }
 
+// 👁 Cập nhật UI tạm thời khi đang tap liên tục
+function updateUIWithPreview(previewTaps = 0) {
+  const currentEnergy = Math.max(0, calculateEnergy(lastTapAt) - previewTaps);
+  const currentCoin = coin + previewTaps;
+
+  coinCountEl.textContent = currentCoin;
+  const percent = (currentEnergy / maxEnergy) * 100;
+  energyFillEl.style.width = `${percent}%`;
+  energyLabelEl.textContent = `${currentEnergy} / ${maxEnergy}`;
+}
+
+// Lấy user từ server
 if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
@@ -57,20 +69,21 @@ if (user) {
   document.getElementById('greeting').textContent = 'Không thể lấy thông tin người dùng.';
 }
 
-// Gộp nhiều lần tap
+// Tap logic
 let pendingTaps = 0;
 let debounceTimeout = null;
 
 bigCoinEl.addEventListener('click', () => {
-  if (energy <= 0) {
+  if (calculateEnergy(lastTapAt) <= pendingTaps) {
     tg.HapticFeedback.notificationOccurred('error');
     alert('Bạn đã hết năng lượng! Hãy đợi hồi năng lượng nhé.');
     return;
   }
 
   pendingTaps++;
+  updateUIWithPreview(pendingTaps);
 
-  // Rung và hiệu ứng +1
+  // Rung và hiệu ứng
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
 
@@ -95,7 +108,7 @@ bigCoinEl.addEventListener('click', () => {
       .then(data => {
         coin = data.coin;
         lastTapAt = data.last_tap_at;
-        energy = calculateEnergy(lastTapAt); // 🧠 Tính lại chính xác sau khi server cập nhật
+        energy = calculateEnergy(lastTapAt);
         updateUI();
       })
       .catch(err => console.error('Lỗi khi gửi tap:', err));
@@ -104,7 +117,7 @@ bigCoinEl.addEventListener('click', () => {
   }, 1000);
 });
 
-// Xử lý chuyển tab
+// Chuyển tab
 document.querySelectorAll('nav.menu button').forEach(button => {
   button.addEventListener('click', () => {
     const targetTab = button.getAttribute('data-tab');
