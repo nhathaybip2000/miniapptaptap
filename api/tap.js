@@ -1,3 +1,4 @@
+// api/tap.js
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -10,48 +11,29 @@ export default async function handler(req, res) {
 
   const { id, count } = req.body;
 
-  if (!id || !count || count < 1) {
-    return res.status(400).json({ error: 'Thiếu id hoặc số lần tap không hợp lệ' });
-  }
+  if (!id || !count) return res.status(400).json({ error: 'Thiếu id hoặc count' });
 
-  const { data: user, error: getError } = await supabase
+  const { data: user, error } = await supabase
     .from('users')
-    .select('coin, last_tap_at')
+    .select('coin')
     .eq('id', id)
     .single();
 
-  if (getError || !user) {
-    return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+  if (error || !user) {
+    return res.status(404).json({ error: 'Không tìm thấy user' });
   }
 
-  const now = Date.now();
-  const last = user.last_tap_at ? new Date(user.last_tap_at).getTime() : 0;
-  const elapsed = now - last;
-
-  const maxEnergy = 500;
-  const energy = Math.floor(maxEnergy * Math.min(1, elapsed / (30 * 60 * 1000))); // 30 phút hồi đầy
-
-  if (energy < count) {
-    return res.status(400).json({ error: 'Không đủ năng lượng để Tap' });
-  }
-
-  // ✅ Lưu lại thời điểm hiện tại làm mốc mới cho lần tap
-  const newLastTapAt = new Date().toISOString();
+  const newCoin = user.coin + count;
+  const now = new Date().toISOString();
 
   const { error: updateError } = await supabase
     .from('users')
-    .update({
-      coin: user.coin + count,
-      last_tap_at: newLastTapAt
-    })
+    .update({ coin: newCoin, last_tap_at: now })
     .eq('id', id);
 
   if (updateError) {
-    return res.status(500).json({ error: 'Lỗi khi cập nhật dữ liệu' });
+    return res.status(500).json({ error: 'Lỗi khi cập nhật coin' });
   }
 
-  return res.status(200).json({
-    coin: user.coin + count,
-    last_tap_at: newLastTapAt
-  });
+  res.status(200).json({ coin: newCoin, last_tap_at: now });
 }
