@@ -77,6 +77,10 @@ bigCoinEl.addEventListener('click', () => {
   coin++;
   energy--;
   pendingTaps++;
+
+  // ✅ Cập nhật lại thời gian tap mới nhất
+  lastTapAt = new Date().toISOString();
+
   updateUI();
 
   // Rung và hiệu ứng +1
@@ -113,6 +117,7 @@ bigCoinEl.addEventListener('click', () => {
     pendingTaps = 0;
   }, 1000);
 });
+
 
 // Xử lý chuyển tab
 document.querySelectorAll('nav.menu button').forEach(button => {
