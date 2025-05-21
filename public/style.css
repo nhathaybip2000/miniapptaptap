@@ -8,18 +8,16 @@
 
 html, body {
   height: 100%;
-}
-
-body {
   background: #121212;
   color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
-/* Container */
+/* Body không dùng flex để tránh dồn giữa */
+body {
+  display: block;
+}
+
+/* Container chính */
 .container {
   width: 100%;
   max-width: 420px;
@@ -27,12 +25,9 @@ body {
   padding: 20px;
   border-radius: 20px;
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  padding-bottom: 100px; /* đảm bảo không bị che nội dung bởi menu */
+  margin: auto;
+  min-height: 100vh;
+  padding-bottom: 100px; /* tránh menu che nội dung */
 }
 
 /* Header */
@@ -62,11 +57,15 @@ header .welcome {
 }
 
 /* Pet Coin */
+.pet {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
 .pet img {
   width: 200px;
   transition: transform 0.2s ease;
 }
-
 .pet img:active {
   transform: scale(1.05);
 }
@@ -80,7 +79,6 @@ header .welcome {
   justify-content: center;
   font-size: 14px;
 }
-
 .bar {
   flex: 1;
   height: 16px;
@@ -89,12 +87,25 @@ header .welcome {
   overflow: hidden;
   max-width: 240px;
 }
-
 .fill {
   height: 100%;
   background: #00FF00;
-  width: 96.4%;
+  width: 0%;
   border-radius: 10px;
+}
+
+/* Tab nội dung */
+.tab {
+  display: none;
+  padding: 20px 10px;
+  text-align: center;
+  color: white;
+  max-width: 420px;
+  margin: auto;
+  padding-top: 40px; /* ✅ tránh sát top */
+}
+.tab.active {
+  display: block;
 }
 
 /* Menu Navigation (Bottom bar fixed) */
@@ -114,7 +125,6 @@ header .welcome {
   margin: 0 auto;
   z-index: 10;
 }
-
 .menu button {
   background: #222;
   color: white;
@@ -130,35 +140,32 @@ header .welcome {
   box-shadow: 0 3px 6px rgba(0,0,0,0.3);
   margin: 0 5px;
 }
-
 .menu button:hover {
   background: #333;
 }
-
 .icon {
   width: 32px;
   height: 32px;
   margin-bottom: 6px;
 }
 
-/* Responsive for smaller screens */
+/* Responsive cho màn nhỏ */
 @media screen and (max-width: 360px) {
   .menu {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
   }
-
   .menu button {
     flex: 0 0 45%;
     margin: 5px 0;
   }
 }
+
 /* Hiệu ứng rung */
 .shake {
   animation: shake 0.3s;
 }
-
 @keyframes shake {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(5deg); }
@@ -173,8 +180,9 @@ header .welcome {
   font-weight: bold;
   animation: floatUp 1s ease-out forwards;
   pointer-events: none;
+  position: absolute;
+  z-index: 1000;
 }
-
 @keyframes floatUp {
   0% { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(-40px); opacity: 0; }

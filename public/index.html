@@ -1,57 +1,78 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>CatCoin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <div class="container">
     <header>
       <div class="welcome">
         <p id="greeting">Đang tải thông tin người dùng...</p>
-      </div>      
+      </div>
     </header>
 
-    <section class="balance">
-      <p>Your Balance</p>
-      <h2>
-        <img src="assets/coin.png" class="coin-icon" />
-        <span id="coin-count"></span>
-      </h2>
+    <!-- Tab: Khai Thác -->
+    <section id="tab-khaithac" class="tab active">
+      <section class="balance">
+        <p>Your Balance</p>
+        <h2>
+          <img src="assets/coin.png" class="coin-icon" />
+          <span id="coin-count"></span>
+        </h2>
+      </section>
+
+      <div class="pet">
+        <img src="assets/pet.png" alt="Pet" id="big-coin" />
+      </div>
+
+      <div class="energy-bar">
+        <span>⚡</span>
+        <div class="bar">
+          <div class="fill"></div>
+        </div>
+        <span class="label">0 / 500</span>
+      </div>
     </section>
 
-    <div class="pet">
-      <img src="assets/pet.png" alt="Pet" id="big-coin">
-    </div>
+    <!-- Tab: Nhiệm Vụ -->
+    <section id="tab-nhiemvu" class="tab">
+      <h2>Nhiệm Vụ</h2>
+      <p>💥 Tính năng đang phát triển...</p>
+    </section>
 
-    <div class="energy-bar">
-      <span>⚡</span>
-      <div class="bar">
-        <div class="fill" style="width: 96.4%;"></div>
-      </div>
-      <span class="label">0 / 500</span>
-    </div>
+    <!-- Tab: Mời Bạn Bè -->
+    <section id="tab-moibanbe" class="tab">
+      <h2>Mời Bạn Bè</h2>
+      <p>🔗 Chia sẻ link giới thiệu và nhận thưởng!</p>
+    </section>
+
+    <!-- Tab: Tài Khoản -->
+    <section id="tab-taikhoan" class="tab">
+      <h2>Tài Khoản</h2>
+      <p>📋 Thông tin của bạn sẽ hiển thị ở đây.</p>
+    </section>
   </div>
 
-  <!-- Menu để ngoài container để cố định ở bottom -->
+  <!-- Menu -->
   <nav class="menu">
-    <button>
-      <img src="assets/khaithac.png" class="icon">
+    <button data-tab="khaithac">
+      <img src="assets/khaithac.png" class="icon" />
       <span>Khai Thác</span>
-    </button>    
-    <button>
-      <img src="assets/nhiemvu.png" class="icon">
+    </button>
+    <button data-tab="nhiemvu">
+      <img src="assets/nhiemvu.png" class="icon" />
       <span>Nhiệm Vụ</span>
     </button>
-    <button>
-      <img src="assets/moibanbe.png" class="icon">
+    <button data-tab="moibanbe">
+      <img src="assets/moibanbe.png" class="icon" />
       <span>Mời Bạn Bè</span>
     </button>
-    <button>
-      <img src="assets/vi.png" class="icon">
+    <button data-tab="taikhoan">
+      <img src="assets/vi.png" class="icon" />
       <span>Tài Khoản</span>
     </button>
   </nav>
