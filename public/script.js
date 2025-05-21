@@ -107,3 +107,12 @@ bigCoinEl.addEventListener('click', () => {
     pendingTaps = 0;
   }, 1000);
 });
+
+// Xử lý chuyển tab
+document.querySelectorAll('.menu button').forEach((button, idx) => {
+  button.addEventListener('click', () => {
+    const tabIds = ['khaithac', 'nhiemvu', 'moibanbe', 'taikhoan'];
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('tab-' + tabIds[idx]).classList.add('active');
+  });
+});
