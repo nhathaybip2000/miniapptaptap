@@ -111,7 +111,7 @@ bigCoinEl.addEventListener('click', () => {
         lastTapAt = data.last_tap_at;
         energy = calculateEnergy(lastTapAt);
         updateUI();
-      })
+      })      
       .catch(err => console.error('Lỗi khi gửi tap:', err));
 
     pendingTaps = 0;

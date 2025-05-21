@@ -34,19 +34,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Không đủ năng lượng để Tap' });
   }
 
-  const remainingEnergy = energy - count;
-
-  const updateFields = {
-    coin: user.coin + count
-  };
-
-  if (remainingEnergy <= 0) {
-    updateFields.last_tap_at = new Date().toISOString(); // Chỉ cập nhật nếu đã dùng hết
-  }
+  // 🧠 Tính lại thời gian mới tương ứng với số năng lượng đã dùng
+  const recoveryRate = (30 * 60 * 1000) / maxEnergy; // 3.6s per energy
+  const newLastTapAt = new Date(now - (energy - count) * recoveryRate).toISOString();
 
   const { error: updateError } = await supabase
     .from('users')
-    .update(updateFields)
+    .update({
+      coin: user.coin + count,
+      last_tap_at: newLastTapAt
+    })
     .eq('id', id);
 
   if (updateError) {
@@ -55,6 +52,6 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     coin: user.coin + count,
-    last_tap_at: updateFields.last_tap_at || user.last_tap_at
+    last_tap_at: newLastTapAt
   });
 }
