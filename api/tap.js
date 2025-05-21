@@ -8,13 +8,13 @@ const supabase = createClient(
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { id, count } = req.body;
+  const { id, tapCount } = req.body;
 
-  if (!id || !count || count < 1) {
+  if (!id || !tapCount || tapCount < 1) {
     return res.status(400).json({ error: 'Thiếu id hoặc số lần tap không hợp lệ' });
   }
 
-  // 🔍 Lấy đầy đủ dữ liệu người dùng
+  // Lấy dữ liệu user
   const { data: user, error: getError } = await supabase
     .from('users')
     .select('coin, last_tap_at, tap_level, energy_level')
@@ -29,26 +29,22 @@ export default async function handler(req, res) {
   const last = user.last_tap_at ? new Date(user.last_tap_at).getTime() : 0;
   const elapsed = now - last;
 
-  // ⚡ Hồi năng lượng dựa theo cấp độ
-  const energyCap = 500 + (user.energy_level - 1) * 200; // mỗi cấp thêm 200 năng lượng
-  const recoveryDuration = 30 * 60 * 1000; // 30 phút để hồi đầy
+  // Hồi năng lượng
+  const energyCap = 500 + (user.energy_level - 1) * 200;
+  const recoveryDuration = 30 * 60 * 1000;
   const recoveryRate = recoveryDuration / energyCap;
-
   const energyRecovered = Math.min(energyCap, Math.floor((elapsed / recoveryDuration) * energyCap));
-  const remainingEnergy = energyRecovered - count;
+  const remainingEnergy = energyRecovered - tapCount;
 
   if (remainingEnergy < 0) {
     return res.status(400).json({ error: 'Không đủ năng lượng để Tap' });
   }
 
-  // ✅ Tính số xu nhận dựa vào cấp độ tap
   const coinPerTap = user.tap_level || 1;
-  const coinEarned = coinPerTap * count;
+  const coinEarned = coinPerTap * tapCount;
 
-  // ⚠️ Cập nhật lại last_tap_at dựa trên năng lượng còn lại
   const newLastTapAt = new Date(now - remainingEnergy * recoveryRate).toISOString();
 
-  // ✅ Cập nhật lại vào database
   const { error: updateError } = await supabase
     .from('users')
     .update({

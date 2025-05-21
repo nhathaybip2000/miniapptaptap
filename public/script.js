@@ -122,7 +122,7 @@ bigCoinEl.addEventListener('click', () => {
     fetch('/api/tap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: user.id, count: pendingTaps * tapLevel })
+      body: JSON.stringify({ id: user.id, tapCount: pendingTaps })
     })
       .then(res => res.json())
       .then(data => {
