@@ -14,7 +14,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Thiếu id hoặc số lần tap không hợp lệ' });
   }
 
-  // Lấy dữ liệu user
   const { data: user, error: getError } = await supabase
     .from('users')
     .select('coin, last_tap_at, tap_level, energy_level')
@@ -29,10 +28,10 @@ export default async function handler(req, res) {
   const last = user.last_tap_at ? new Date(user.last_tap_at).getTime() : 0;
   const elapsed = now - last;
 
-  // Hồi năng lượng
   const energyCap = 500 + (user.energy_level - 1) * 200;
   const recoveryDuration = 30 * 60 * 1000;
   const recoveryRate = recoveryDuration / energyCap;
+
   const energyRecovered = Math.min(energyCap, Math.floor((elapsed / recoveryDuration) * energyCap));
   const remainingEnergy = energyRecovered - tapCount;
 
