@@ -15,13 +15,13 @@ const bigCoinEl = document.getElementById('big-coin');
 
 // Tính lại năng lượng dựa trên thời gian
 function calculateEnergy(lastTime) {
-  if (!lastTime) return maxEnergy;
+  if (!lastTime) return 500;
   const now = Date.now();
   const last = new Date(lastTime).getTime();
   const elapsed = now - last;
-  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút = đầy 500
-  return Math.floor(maxEnergy * percent);
+  return Math.min(500, Math.floor(500 * (elapsed / (30 * 60 * 1000))));
 }
+
 
 function updateUI() {
   coinCountEl.textContent = coin;
