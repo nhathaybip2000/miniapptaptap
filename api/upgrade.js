@@ -22,28 +22,33 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'Không tìm thấy người dùng' });
   }
 
-  let updates = {};
-  let cost = 0;
+  const tapUpgradeCosts = [0, 100, 200, 400, 700, 1000, 1500, 2000];
+  const energyUpgradeCosts = [0, 100, 300, 600, 1000, 1500, 2100, 2800];
+
+  let totalCost = 0;
+  const updates = {};
 
   if (tapLevel && tapLevel > user.tap_level) {
-    const tapUpgradeCosts = [0, 100, 200, 400, 700, 1000, 1500, 2000];
-    cost = tapUpgradeCosts[tapLevel] || 0;
-
-    if (user.coin < cost) return res.status(400).json({ error: 'Không đủ xu nâng cấp tap' });
-
+    const tapCost = tapUpgradeCosts[tapLevel] || 0;
+    totalCost += tapCost;
     updates.tap_level = tapLevel;
   }
 
   if (energyLevel && energyLevel > user.energy_level) {
-    const energyUpgradeCosts = [0, 100, 300, 600, 1000, 1500, 2100, 2800];
-    cost = energyUpgradeCosts[energyLevel] || 0;
-
-    if (user.coin < cost) return res.status(400).json({ error: 'Không đủ xu nâng cấp năng lượng' });
-
+    const energyCost = energyUpgradeCosts[energyLevel] || 0;
+    totalCost += energyCost;
     updates.energy_level = energyLevel;
   }
 
-  updates.coin = user.coin - cost;
+  if (totalCost === 0) {
+    return res.status(400).json({ error: 'Không có nâng cấp hợp lệ' });
+  }
+
+  if (user.coin < totalCost) {
+    return res.status(400).json({ error: 'Không đủ xu để nâng cấp' });
+  }
+
+  updates.coin = user.coin - totalCost;
 
   const { error: updateError } = await supabase
     .from('users')
@@ -54,5 +59,16 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Lỗi khi cập nhật nâng cấp' });
   }
 
-  return res.status(200).json({ success: true });
+  // Lấy lại dữ liệu mới sau update
+  const { data: updatedUser, error: fetchError } = await supabase
+    .from('users')
+    .select('coin, tap_level, energy_level')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !updatedUser) {
+    return res.status(500).json({ error: 'Lỗi khi tải lại thông tin người dùng sau nâng cấp' });
+  }
+
+  return res.status(200).json({ success: true, user: updatedUser });
 }

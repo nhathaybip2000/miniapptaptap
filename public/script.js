@@ -126,11 +126,20 @@ bigCoinEl.addEventListener('click', () => {
     })
       .then(res => res.json())
       .then(data => {
-        coin = data.coin;
-        lastTapAt = data.last_tap_at;
-        energy = calculateEnergy(lastTapAt);
-        updateUI();
+        if (data.success && data.user) {
+          const u = data.user;
+          coin = u.coin;
+          tapLevel = u.tap_level || 1;
+          energyLevel = u.energy_level || 1;
+          maxEnergy = energyLevels[energyLevel];
+          lastTapAt = u.last_tap_at;
+          energy = calculateEnergy(lastTapAt);
+          updateUI();
+        } else {
+          console.error('Lỗi dữ liệu trả về từ server:', data);
+        }
       })
+      
       .catch(err => console.error('Lỗi khi gửi tap:', err));
 
     pendingTaps = 0;
@@ -142,18 +151,25 @@ document.getElementById('upgrade-tap').addEventListener('click', () => {
   if (tapLevel >= maxLevel) return alert('Đã đạt cấp tối đa!');
   const cost = tapUpgradeCosts[tapLevel + 1];
   if (coin < cost) return alert('Không đủ xu để nâng cấp.');
-  coin -= cost;
-  tapLevel++;
 
-  // Gửi lên server
   fetch('/api/upgrade', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: user.id, tapLevel })
-  });
-
-  updateUI();
+    body: JSON.stringify({ id: user.id, tapLevel: tapLevel + 1 })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.user) {
+        const u = data.user;
+        coin = u.coin;
+        tapLevel = u.tap_level || 1;
+        updateUI();
+      } else {
+        alert('Lỗi nâng cấp tap.');
+      }
+    });
 });
+
 
 // Nâng cấp năng lượng
 document.getElementById('upgrade-energy').addEventListener('click', () => {
