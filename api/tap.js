@@ -27,17 +27,20 @@ export default async function handler(req, res) {
   const now = Date.now();
   const last = user.last_tap_at ? new Date(user.last_tap_at).getTime() : 0;
   const elapsed = now - last;
+
   const maxEnergy = 500;
-  const recoveryRate = (30 * 60 * 1000) / maxEnergy;
+  const recoveryDuration = 30 * 60 * 1000;
+  const recoveryRate = recoveryDuration / maxEnergy;
 
-  const energyRecovered = Math.floor(maxEnergy * Math.min(1, elapsed / (30 * 60 * 1000)));
+  const energyRecovered = Math.min(maxEnergy, Math.floor((elapsed / recoveryDuration) * maxEnergy));
+  const remainingEnergy = energyRecovered - count;
 
-  if (energyRecovered < count) {
+  if (remainingEnergy < 0) {
     return res.status(400).json({ error: 'Không đủ năng lượng để Tap' });
   }
 
-  const remainingEnergy = energyRecovered - count;
-  const newLastTapAt = new Date(now - (maxEnergy - remainingEnergy) * recoveryRate).toISOString();
+  // ⚠️ Sửa ở đây: Tính newLastTapAt đúng!
+  const newLastTapAt = new Date(now - remainingEnergy * recoveryRate).toISOString();
 
   const { error: updateError } = await supabase
     .from('users')
