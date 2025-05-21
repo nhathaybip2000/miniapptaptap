@@ -19,7 +19,7 @@ function calculateEnergy(lastTime) {
   const now = Date.now();
   const last = new Date(lastTime).getTime();
   const elapsed = now - last;
-  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút
+  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút = đầy 500
   return Math.floor(maxEnergy * percent);
 }
 
@@ -47,9 +47,9 @@ if (user) {
     .then(data => {
       coin = data.coin;
       lastTapAt = data.last_tap_at;
-      energy = calculateEnergy(lastTapAt);
+      energy = calculateEnergy(lastTapAt);  // 🧠 Tính lại năng lượng
       updateUI();
-    })
+    })    
     .catch(err => {
       console.error('Lỗi khi lấy user:', err);
     });
