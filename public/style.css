@@ -187,3 +187,28 @@ header .welcome {
   0% { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(-40px); opacity: 0; }
 }
+
+.upgrade-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 0 20px;
+}
+
+.upgrade-section button {
+  background-color: #f9c74f;
+  color: #333;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: 'Fredoka', sans-serif;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.1s ease;
+}
+
+.upgrade-section button:active {
+  transform: scale(0.97);
+}

@@ -14,9 +14,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Thiếu id hoặc số lần tap không hợp lệ' });
   }
 
+  // 🔍 Lấy đầy đủ dữ liệu người dùng
   const { data: user, error: getError } = await supabase
     .from('users')
-    .select('coin, last_tap_at')
+    .select('coin, last_tap_at, tap_level, energy_level')
     .eq('id', id)
     .single();
 
@@ -28,24 +29,30 @@ export default async function handler(req, res) {
   const last = user.last_tap_at ? new Date(user.last_tap_at).getTime() : 0;
   const elapsed = now - last;
 
-  const maxEnergy = 500;
-  const recoveryDuration = 30 * 60 * 1000;
-  const recoveryRate = recoveryDuration / maxEnergy;
+  // ⚡ Hồi năng lượng dựa theo cấp độ
+  const energyCap = 500 + (user.energy_level - 1) * 200; // mỗi cấp thêm 200 năng lượng
+  const recoveryDuration = 30 * 60 * 1000; // 30 phút để hồi đầy
+  const recoveryRate = recoveryDuration / energyCap;
 
-  const energyRecovered = Math.min(maxEnergy, Math.floor((elapsed / recoveryDuration) * maxEnergy));
+  const energyRecovered = Math.min(energyCap, Math.floor((elapsed / recoveryDuration) * energyCap));
   const remainingEnergy = energyRecovered - count;
 
   if (remainingEnergy < 0) {
     return res.status(400).json({ error: 'Không đủ năng lượng để Tap' });
   }
 
-  // ⚠️ Sửa ở đây: Tính newLastTapAt đúng!
+  // ✅ Tính số xu nhận dựa vào cấp độ tap
+  const coinPerTap = user.tap_level || 1;
+  const coinEarned = coinPerTap * count;
+
+  // ⚠️ Cập nhật lại last_tap_at dựa trên năng lượng còn lại
   const newLastTapAt = new Date(now - remainingEnergy * recoveryRate).toISOString();
 
+  // ✅ Cập nhật lại vào database
   const { error: updateError } = await supabase
     .from('users')
     .update({
-      coin: user.coin + count,
+      coin: user.coin + coinEarned,
       last_tap_at: newLastTapAt
     })
     .eq('id', id);
@@ -55,7 +62,7 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({
-    coin: user.coin + count,
+    coin: user.coin + coinEarned,
     last_tap_at: newLastTapAt
   });
 }
