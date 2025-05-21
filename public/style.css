@@ -63,10 +63,8 @@ header .welcome {
 
 /* Pet Coin */
 .pet img {
-  width: 160px;
-  margin: 20px 0;
+  width: 200px;
   transition: transform 0.2s ease;
-  cursor: pointer;
 }
 
 .pet img:active {
