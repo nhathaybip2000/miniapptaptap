@@ -1,4 +1,3 @@
-
 const tg = window.Telegram.WebApp;
 tg.expand();
 
@@ -76,6 +75,9 @@ if (user) {
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
+      tapLevel = data.tap_level || 1;
+      energyLevel = data.energy_level || 1;
+      maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       energy = calculateEnergy(lastTapAt);
       updateUI();
@@ -142,6 +144,14 @@ document.getElementById('upgrade-tap').addEventListener('click', () => {
   if (coin < cost) return alert('Không đủ xu để nâng cấp.');
   coin -= cost;
   tapLevel++;
+
+  // Gửi lên server
+  fetch('/api/upgrade', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: user.id, tapLevel })
+  });
+
   updateUI();
 });
 
@@ -154,6 +164,14 @@ document.getElementById('upgrade-energy').addEventListener('click', () => {
   energyLevel++;
   maxEnergy = energyLevels[energyLevel];
   energy = calculateEnergy(lastTapAt);
+
+  // Gửi lên server
+  fetch('/api/upgrade', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: user.id, energyLevel })
+  });
+
   updateUI();
 });
 

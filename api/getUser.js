@@ -26,19 +26,20 @@ export default async function handler(req, res) {
   if (existing) return res.status(200).json(existing);
 
   // 🆕 Nếu user chưa tồn tại, tạo mới user
-  const { data: created, error: insertError } = await supabase
-    .from('users')
-    .insert([{
-      id,
-      first_name,
-      username,
-      coin: 0,
-      last_tap_at: null,
-      tap_level: 1,
-      energy_level: 1
-    }])
-    .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level')
-    .single();
+// Nếu chưa có → tạo mới
+const { data: created, error: insertError } = await supabase
+  .from('users')
+  .insert([{
+    id,
+    first_name,
+    username,
+    coin: 0,
+    last_tap_at: null,
+    tap_level: 1,       // 👈 thêm mặc định
+    energy_level: 1     // 👈 thêm mặc định
+  }])
+  .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level')
+  .single();
 
   if (insertError) {
     return res.status(500).json({ error: insertError.message });
