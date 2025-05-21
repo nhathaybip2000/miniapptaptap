@@ -13,6 +13,16 @@ const energyFillEl = document.querySelector('.fill');
 const energyLabelEl = document.querySelector('.label');
 const bigCoinEl = document.getElementById('big-coin');
 
+// Tính lại năng lượng dựa trên thời gian
+function calculateEnergy(lastTime) {
+  if (!lastTime) return maxEnergy;
+  const now = Date.now();
+  const last = new Date(lastTime).getTime();
+  const elapsed = now - last;
+  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút
+  return Math.floor(maxEnergy * percent);
+}
+
 function updateUI() {
   coinCountEl.textContent = coin;
   const percent = (energy / maxEnergy) * 100;
@@ -20,7 +30,6 @@ function updateUI() {
   energyLabelEl.textContent = `${energy} / ${maxEnergy}`;
 }
 
-// Lấy thông tin user khi vào app
 if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
@@ -37,8 +46,8 @@ if (user) {
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
-      energy = data.energy;
       lastTapAt = data.last_tap_at;
+      energy = calculateEnergy(lastTapAt);
       updateUI();
     })
     .catch(err => {
@@ -64,7 +73,7 @@ bigCoinEl.addEventListener('click', () => {
   pendingTaps++;
   updateUI();
 
-  // Hiệu ứng rung và +1
+  // Rung và hiệu ứng
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
 
@@ -89,8 +98,8 @@ bigCoinEl.addEventListener('click', () => {
       .then(res => res.json())
       .then(data => {
         coin = data.coin;
-        energy = data.energy;
         lastTapAt = data.last_tap_at;
+        energy = calculateEnergy(lastTapAt);
         updateUI();
       })
       .catch(err => console.error('Lỗi khi gửi tap:', err));
