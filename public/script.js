@@ -15,12 +15,13 @@ const bigCoinEl = document.getElementById('big-coin');
 
 // Tính lại năng lượng dựa trên thời gian
 function calculateEnergy(lastTime) {
-  if (!lastTime) return maxEnergy;
+  if (!lastTime) return 500;
   const now = Date.now();
   const last = new Date(lastTime).getTime();
   const elapsed = now - last;
-  return Math.min(maxEnergy, Math.floor(maxEnergy * (elapsed / (30 * 60 * 1000))));
+  return Math.min(500, Math.floor(500 * (elapsed / (30 * 60 * 1000))));
 }
+
 
 function updateUI() {
   coinCountEl.textContent = coin;
@@ -29,7 +30,6 @@ function updateUI() {
   energyLabelEl.textContent = `${energy} / ${maxEnergy}`;
 }
 
-// Gửi & lấy dữ liệu từ backend
 if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
@@ -47,15 +47,9 @@ if (user) {
     .then(data => {
       coin = data.coin;
       lastTapAt = data.last_tap_at;
-      energy = calculateEnergy(lastTapAt);
+      energy = calculateEnergy(lastTapAt);  // 🧠 Tính lại năng lượng
       updateUI();
-
-      // Tự động cập nhật năng lượng mỗi giây
-      setInterval(() => {
-        energy = calculateEnergy(lastTapAt);
-        updateUI();
-      }, 1000);
-    })
+    })    
     .catch(err => {
       console.error('Lỗi khi lấy user:', err);
     });
@@ -63,7 +57,7 @@ if (user) {
   document.getElementById('greeting').textContent = 'Không thể lấy thông tin người dùng.';
 }
 
-// Tap mượt (gộp nhiều lần tap)
+// Gộp nhiều lần tap
 let pendingTaps = 0;
 let debounceTimeout = null;
 
@@ -77,11 +71,9 @@ bigCoinEl.addEventListener('click', () => {
   coin++;
   energy--;
   pendingTaps++;
-
-
   updateUI();
 
-  // Rung và hiệu ứng +1
+  // Rung và hiệu ứng
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
 
@@ -95,7 +87,7 @@ bigCoinEl.addEventListener('click', () => {
   document.body.appendChild(plusOne);
   setTimeout(() => plusOne.remove(), 1000);
 
-  // Gửi API sau 1 giây
+  // Gửi sau 1s (gộp nhiều lần tap)
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
     fetch('/api/tap', {
@@ -109,19 +101,9 @@ bigCoinEl.addEventListener('click', () => {
         lastTapAt = data.last_tap_at;
         energy = calculateEnergy(lastTapAt);
         updateUI();
-      })      
+      })
       .catch(err => console.error('Lỗi khi gửi tap:', err));
 
     pendingTaps = 0;
   }, 1000);
-});
-
-
-// Xử lý chuyển tab
-document.querySelectorAll('nav.menu button').forEach(button => {
-  button.addEventListener('click', () => {
-    const targetTab = button.getAttribute('data-tab');
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById('tab-' + targetTab).classList.add('active');
-  });
 });
