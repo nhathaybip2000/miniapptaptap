@@ -68,12 +68,9 @@ bigCoinEl.addEventListener('click', () => {
     return;
   }
 
-  coin++;
-  energy--;
   pendingTaps++;
-  updateUI();
 
-  // Rung và hiệu ứng
+  // Rung và hiệu ứng +1
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
 
@@ -87,7 +84,6 @@ bigCoinEl.addEventListener('click', () => {
   document.body.appendChild(plusOne);
   setTimeout(() => plusOne.remove(), 1000);
 
-  // Gửi sau 1s (gộp nhiều lần tap)
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
     fetch('/api/tap', {
@@ -99,7 +95,7 @@ bigCoinEl.addEventListener('click', () => {
       .then(data => {
         coin = data.coin;
         lastTapAt = data.last_tap_at;
-        energy = calculateEnergy(lastTapAt);
+        energy = calculateEnergy(lastTapAt); // 🧠 Tính lại chính xác sau khi server cập nhật
         updateUI();
       })
       .catch(err => console.error('Lỗi khi gửi tap:', err));
@@ -107,6 +103,7 @@ bigCoinEl.addEventListener('click', () => {
     pendingTaps = 0;
   }, 1000);
 });
+
 // Xử lý chuyển tab
 document.querySelectorAll('nav.menu button').forEach(button => {
   button.addEventListener('click', () => {
