@@ -8,10 +8,10 @@ const supabase = createClient(
 export default async function handler(req, res) {
   const { id, first_name, username } = req.body;
 
-  // ✅ Lấy user cũ – chỉ chọn các trường cần
+  // ✅ Lấy user cũ – chọn đầy đủ các trường cần thiết
   const { data: existing, error: getError } = await supabase
     .from('users')
-    .select('id, username, first_name, coin, last_tap_at') // ← BẮT BUỘC phải có last_tap_at
+    .select('id, username, first_name, coin, energy, last_tap_at') // ← thêm 'energy'
     .eq('id', id)
     .single();
 
@@ -25,8 +25,15 @@ export default async function handler(req, res) {
   // Nếu chưa có → tạo mới
   const { data: created, error: insertError } = await supabase
     .from('users')
-    .insert([{ id, first_name, username, coin: 0, last_tap_at: null }])
-    .select('id, username, first_name, coin, last_tap_at') // ← đảm bảo trả về đủ trường
+    .insert([{
+      id,
+      first_name,
+      username,
+      coin: 0,
+      energy: 500,           // ← thêm energy mặc định
+      last_tap_at: null
+    }])
+    .select('id, username, first_name, coin, energy, last_tap_at') // ← thêm 'energy'
     .single();
 
   if (insertError) return res.status(500).json({ error: insertError.message });

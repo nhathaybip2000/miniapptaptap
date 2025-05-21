@@ -3,7 +3,10 @@ const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 router.post('/', async (req, res) => {
   const { id, count } = req.body;
@@ -36,14 +39,13 @@ router.post('/', async (req, res) => {
     });
   }
 
-  // Thực tế chỉ được tap bằng năng lượng hiện có
+  // Chỉ được tap bằng năng lượng hiện có
   const actualTaps = Math.min(count, currentEnergy);
-
   const newCoin = user.coin + actualTaps;
   const newEnergy = currentEnergy - actualTaps;
   const lastTapAt = new Date().toISOString();
 
-  // Cập nhật vào supabase
+  // Cập nhật vào Supabase
   const { error: updateError } = await supabase
     .from('users')
     .update({
