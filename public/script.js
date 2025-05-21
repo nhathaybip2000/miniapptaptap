@@ -15,13 +15,13 @@ const bigCoinEl = document.getElementById('big-coin');
 
 // Tính lại năng lượng dựa trên thời gian
 function calculateEnergy(lastTime) {
-  if (!lastTime) return 500;
+  if (!lastTime) return maxEnergy;
   const now = Date.now();
   const last = new Date(lastTime).getTime();
   const elapsed = now - last;
-  return Math.min(500, Math.floor(500 * (elapsed / (30 * 60 * 1000))));
+  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút = đầy 500
+  return Math.floor(maxEnergy * percent);
 }
-
 
 function updateUI() {
   coinCountEl.textContent = coin;
@@ -106,13 +106,4 @@ bigCoinEl.addEventListener('click', () => {
 
     pendingTaps = 0;
   }, 1000);
-});
-
-// Xử lý chuyển tab
-document.querySelectorAll('.menu button').forEach((button, idx) => {
-  button.addEventListener('click', () => {
-    const tabIds = ['khaithac', 'nhiemvu', 'moibanbe', 'taikhoan'];
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById('tab-' + tabIds[idx]).classList.add('active');
-  });
 });
