@@ -5,22 +5,13 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
-// Hàm tính lại năng lượng dựa trên last_tap_at
-function calculateEnergy(lastTapAt, maxEnergy = 500) {
-  if (!lastTapAt) return maxEnergy;
-  const now = Date.now();
-  const last = new Date(lastTapAt).getTime();
-  const elapsed = now - last;
-  const percent = Math.min(1, elapsed / (30 * 60 * 1000)); // 30 phút hồi full
-  return Math.floor(maxEnergy * percent);
-}
-
 export default async function handler(req, res) {
   const { id, first_name, username } = req.body;
 
+  // ✅ Lấy user cũ – chỉ chọn các trường cần
   const { data: existing, error: getError } = await supabase
     .from('users')
-    .select('id, username, first_name, coin, energy, last_tap_at')
+    .select('id, username, first_name, coin, last_tap_at') // ← BẮT BUỘC phải có last_tap_at
     .eq('id', id)
     .single();
 
@@ -28,29 +19,14 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: getError.message });
   }
 
-  if (existing) {
-    // ✅ Tính lại năng lượng
-    const newEnergy = calculateEnergy(existing.last_tap_at);
+  // Nếu đã có user → trả về
+  if (existing) return res.status(200).json(existing);
 
-    // ✅ Cập nhật vào DB nếu giá trị mới khác
-    if (newEnergy !== existing.energy) {
-      await supabase
-        .from('users')
-        .update({ energy: newEnergy })
-        .eq('id', id);
-    }
-
-    return res.status(200).json({
-      ...existing,
-      energy: newEnergy // Trả về energy đã tính
-    });
-  }
-
-  // Nếu chưa có user → tạo mới
+  // Nếu chưa có → tạo mới
   const { data: created, error: insertError } = await supabase
     .from('users')
-    .insert([{ id, first_name, username, coin: 0, energy: 500, last_tap_at: null }])
-    .select('id, username, first_name, coin, energy, last_tap_at')
+    .insert([{ id, first_name, username, coin: 0, last_tap_at: null }])
+    .select('id, username, first_name, coin, last_tap_at') // ← đảm bảo trả về đủ trường
     .single();
 
   if (insertError) return res.status(500).json({ error: insertError.message });
