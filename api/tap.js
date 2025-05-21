@@ -1,39 +1,69 @@
-// api/tap.js
-import { createClient } from '@supabase/supabase-js';
+// /api/tap.js
+const express = require('express');
+const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end();
-
+router.post('/', async (req, res) => {
   const { id, count } = req.body;
+  if (!id || !count) return res.status(400).json({ error: 'Missing id or count' });
 
-  if (!id || !count) return res.status(400).json({ error: 'Thiếu id hoặc count' });
-
+  // Lấy thông tin user
   const { data: user, error } = await supabase
     .from('users')
-    .select('coin')
+    .select('coin, energy, last_tap_at')
     .eq('id', id)
     .single();
 
-  if (error || !user) {
-    return res.status(404).json({ error: 'Không tìm thấy user' });
+  if (error || !user) return res.status(500).json({ error: 'User not found' });
+
+  const maxEnergy = 500;
+  const now = Date.now();
+  const lastTap = new Date(user.last_tap_at || 0).getTime();
+  const elapsed = now - lastTap;
+
+  // Hồi năng lượng dựa vào thời gian (30 phút hồi đầy)
+  const regen = Math.floor((elapsed / (30 * 60 * 1000)) * maxEnergy);
+  let currentEnergy = Math.min(maxEnergy, user.energy + regen);
+
+  // Nếu không đủ năng lượng để tap
+  if (currentEnergy <= 0) {
+    return res.json({
+      coin: user.coin,
+      energy: 0,
+      last_tap_at: user.last_tap_at
+    });
   }
 
-  const newCoin = user.coin + count;
-  const now = new Date().toISOString();
+  // Thực tế chỉ được tap bằng năng lượng hiện có
+  const actualTaps = Math.min(count, currentEnergy);
 
+  const newCoin = user.coin + actualTaps;
+  const newEnergy = currentEnergy - actualTaps;
+  const lastTapAt = new Date().toISOString();
+
+  // Cập nhật vào supabase
   const { error: updateError } = await supabase
     .from('users')
-    .update({ coin: newCoin, last_tap_at: now })
+    .update({
+      coin: newCoin,
+      energy: newEnergy,
+      last_tap_at: lastTapAt
+    })
     .eq('id', id);
 
   if (updateError) {
-    return res.status(500).json({ error: 'Lỗi khi cập nhật coin' });
+    console.error('Lỗi khi cập nhật dữ liệu:', updateError);
+    return res.status(500).json({ error: 'Cập nhật thất bại' });
   }
 
-  res.status(200).json({ coin: newCoin, last_tap_at: now });
-}
+  // Gửi lại kết quả
+  res.json({
+    coin: newCoin,
+    energy: newEnergy,
+    last_tap_at: lastTapAt
+  });
+});
+
+module.exports = router;
