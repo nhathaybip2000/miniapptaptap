@@ -78,8 +78,6 @@ bigCoinEl.addEventListener('click', () => {
   energy--;
   pendingTaps++;
 
-  // ✅ Cập nhật lại thời gian tap mới nhất
-  lastTapAt = new Date().toISOString();
 
   updateUI();
 
