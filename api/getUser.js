@@ -32,16 +32,23 @@ export default async function handler(req, res) {
 
     // ❗ Nếu user đã tồn tại
     if (existing) {
-      // ⚡ Nếu user chưa có ref_by và ref_by là hợp lệ
       if (validRef && !existing.ref_by) {
         await supabase
           .from('users')
           .update({ ref_by })
           .eq('id', id);
       }
-
-      return res.status(200).json({ ...existing, ref_by: existing.ref_by || (validRef ? ref_by : null) });
+    
+      // Lấy lại dữ liệu mới nhất sau khi update
+      const { data: updatedUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single();
+    
+      return res.status(200).json(updatedUser);
     }
+    
 
     // Nếu lỗi không phải vì không tìm thấy
     if (getError && getError.code !== 'PGRST116') {
