@@ -103,7 +103,7 @@ if (user) {
       lastTapAt = data.last_tap_at;
       updateUI();
 
-      const inviteLink = `https://t.me/coinxutaptap_bot?start=ref_${user.id}`;
+      const inviteLink = `https://t.me/coinxutaptap_bot/miniApp?start=ref_${user.id}`;
       document.getElementById('invite-link').value = inviteLink;
 
       loadReferrals(user.id);
