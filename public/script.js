@@ -252,9 +252,11 @@ const confirmBtn = document.getElementById('referral-confirm');
 const skipBtn = document.getElementById('referral-skip');
 
 function showReferralModal() {
-  if (localStorage.getItem('referral_done')) return;
+  console.log('[DEBUG] Hiển thị modal nhập mã mời');
+  const modal = document.getElementById('referral-modal');
   modal.classList.add('show');
 }
+
 
 // Gửi ref_by thủ công
 confirmBtn.addEventListener('click', () => {
@@ -287,9 +289,10 @@ skipBtn.addEventListener('click', () => {
   localStorage.setItem('referral_done', '1');
 });
 
-// 👉 Gọi modal nếu chưa từng nhập/ref_by rỗng
 setTimeout(() => {
-  if (ref_by && !localStorage.getItem('referral_done')) {
+  const alreadyShown = localStorage.getItem('referral_done');
+  if (!alreadyShown) {
     showReferralModal();
   }
 }, 1000);
+
