@@ -6,14 +6,16 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Chỉ hỗ trợ POST' });
+    return res.status(405).json({ error: 'Chỉ hỗ trợ phương thức POST' });
   }
 
   const { id } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: 'Thiếu ID người dùng' });
+  if (!id || typeof id !== 'number') {
+    return res.status(400).json({ error: 'ID người dùng không hợp lệ' });
   }
 
   try {
@@ -24,17 +26,23 @@ export default async function handler(req, res) {
       .order('id', { ascending: false });
 
     if (error) {
-      return res.status(500).json({ error: error.message });
+      console.error('Lỗi Supabase:', error);
+      return res.status(500).json({ error: 'Không thể lấy danh sách mời' });
     }
 
-    // ✅ Tính tổng xu thưởng từ các người bạn mời
-    const total_bonus = data.reduce((sum, user) => sum + (user.ref_bonus || 0), 0);
+    const total_bonus = data.reduce((sum, u) => sum + (u.ref_bonus || 0), 0);
 
     return res.status(200).json({
-      list: data,
+      list: data.map(u => ({
+        id: u.id,
+        username: u.username,
+        first_name: u.first_name || 'Người dùng',
+        ref_bonus: u.ref_bonus || 0
+      })),
       total_bonus
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Lỗi máy chủ' });
+    console.error('Lỗi server:', err);
+    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
   }
 }

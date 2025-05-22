@@ -62,6 +62,11 @@ function loadReferrals(userId) {
       const listEl = document.getElementById('referrals');
       listEl.innerHTML = '';
 
+      if (!data.list || data.list.length === 0) {
+        listEl.innerHTML = '<li>Bạn chưa mời ai cả. Hãy chia sẻ link để nhận thưởng 💰</li>';
+        return;
+      }
+
       data.list.forEach(friend => {
         const li = document.createElement('li');
         li.innerHTML = `
@@ -98,11 +103,9 @@ if (user) {
       lastTapAt = data.last_tap_at;
       updateUI();
 
-      // ✅ Tạo link mời đúng bot
       const inviteLink = `https://t.me/coinxutaptap_bot?start=ref_${user.id}`;
       document.getElementById('invite-link').value = inviteLink;
 
-      // ✅ Tải danh sách bạn bè
       loadReferrals(user.id);
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
@@ -129,7 +132,6 @@ bigCoinEl.addEventListener('click', () => {
   coin += tapLevel;
   updateUI();
 
-  // Hiệu ứng
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
   const plusOne = document.createElement('div');
@@ -218,12 +220,20 @@ document.getElementById('upgrade-energy').addEventListener('click', () => {
     });
 });
 
-// ===== Copy Link =====
+// ===== Copy Link mời bạn =====
 document.getElementById('copy-link').addEventListener('click', () => {
-  const linkInput = document.getElementById('invite-link');
-  linkInput.select();
-  document.execCommand('copy');
-  alert('Đã sao chép link!');
+  const link = document.getElementById('invite-link').value;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link)
+      .then(() => alert('Đã sao chép link!'))
+      .catch(() => alert('Không thể sao chép link.'));
+  } else {
+    const input = document.getElementById('invite-link');
+    input.select();
+    document.execCommand('copy');
+    alert('Đã sao chép link!');
+  }
 });
 
 // ===== Chuyển Tab =====
