@@ -90,8 +90,7 @@ if (user) {
       body: JSON.stringify({
         id: user.id,
         username: user.username,
-        first_name: user.first_name,
-        ref_by: ref_by || null
+        first_name: user.first_name
       })
     })
     

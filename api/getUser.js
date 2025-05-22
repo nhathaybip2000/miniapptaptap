@@ -13,17 +13,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Kiểm tra ref_by có hợp lệ không
-    let validRef = false;
-    if (ref_by && ref_by !== id) {
-      const { data: refUser, error: refError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', ref_by)
-        .single();
-      validRef = !!refUser && !refError;
-    }
-
     const { data: existing, error: getError } = await supabase
       .from('users')
       .select('*')
@@ -66,7 +55,7 @@ export default async function handler(req, res) {
         last_tap_at: null,
         tap_level: 1,
         energy_level: 1,
-        ref_by: validRef ? ref_by : null,
+        ref_by: null, 
         ref_bonus: 0
       }])
       .select('*')
