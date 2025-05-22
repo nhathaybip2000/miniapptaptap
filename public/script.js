@@ -34,8 +34,8 @@ function calculateEnergy(lastTime) {
 }
 
 function updateUI() {
-  const currentEnergy = calculateEnergy(lastTapAt);
-  energy = currentEnergy;
+  const currentEnergy = calculateEnergy(lastTapAt) - pendingTaps * tapLevel;
+  energy = Math.max(0, currentEnergy);
   coinCountEl.textContent = coin;
   const percent = (energy / maxEnergy) * 100;
   energyFillEl.style.width = `${percent}%`;
@@ -70,7 +70,7 @@ if (user) {
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
-  setInterval(updateUI, 5000); // auto refresh UI energy
+  setInterval(updateUI, 5000);
 } else {
   document.getElementById('greeting').textContent = 'Không thể lấy thông tin người dùng.';
 }
@@ -79,7 +79,9 @@ let pendingTaps = 0;
 let debounceTimeout = null;
 
 bigCoinEl.addEventListener('click', () => {
-  if (calculateEnergy(lastTapAt) <= pendingTaps) {
+  const availableEnergy = calculateEnergy(lastTapAt) - pendingTaps * tapLevel;
+
+  if (availableEnergy < tapLevel) {
     tg.HapticFeedback.notificationOccurred('error');
     alert('Bạn đã hết năng lượng! Hãy đợi hồi năng lượng nhé.');
     return;
@@ -87,10 +89,11 @@ bigCoinEl.addEventListener('click', () => {
 
   pendingTaps++;
   coin += tapLevel;
+  updateUI();
 
-  // hiệu ứng
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
+
   const plusOne = document.createElement('div');
   plusOne.textContent = `+${tapLevel}`;
   plusOne.className = 'plus-one';
@@ -101,14 +104,12 @@ bigCoinEl.addEventListener('click', () => {
   document.body.appendChild(plusOne);
   setTimeout(() => plusOne.remove(), 1000);
 
-  updateUI();
-
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
     fetch('/api/tap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: user.id, tapCount: pendingTaps })
+      body: JSON.stringify({ id: user.id, tapCount: pendingTaps, tapLevel }) // ✅ gửi tapLevel
     })
       .then(res => res.json())
       .then(data => {

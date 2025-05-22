@@ -12,6 +12,7 @@ export default async function handler(req, res) {
 
   if (!id) return res.status(400).json({ error: 'Thiếu ID người dùng' });
 
+  // Lấy thông tin người dùng
   const { data: user, error: getError } = await supabase
     .from('users')
     .select('coin, tap_level, energy_level')
@@ -24,17 +25,20 @@ export default async function handler(req, res) {
 
   const tapUpgradeCosts = [0, 100, 200, 400, 700, 1000, 1500, 2000];
   const energyUpgradeCosts = [0, 100, 300, 600, 1000, 1500, 2100, 2800];
+  const maxLevel = 7;
 
   let totalCost = 0;
   const updates = {};
 
-  if (tapLevel && tapLevel > user.tap_level) {
+  // Xử lý nâng cấp tap
+  if (tapLevel && tapLevel > user.tap_level && tapLevel <= maxLevel) {
     const tapCost = tapUpgradeCosts[tapLevel] || 0;
     totalCost += tapCost;
     updates.tap_level = tapLevel;
   }
 
-  if (energyLevel && energyLevel > user.energy_level) {
+  // Xử lý nâng cấp năng lượng
+  if (energyLevel && energyLevel > user.energy_level && energyLevel <= maxLevel) {
     const energyCost = energyUpgradeCosts[energyLevel] || 0;
     totalCost += energyCost;
     updates.energy_level = energyLevel;
@@ -50,6 +54,7 @@ export default async function handler(req, res) {
 
   updates.coin = user.coin - totalCost;
 
+  // Cập nhật vào database
   const { error: updateError } = await supabase
     .from('users')
     .update(updates)
@@ -59,7 +64,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Lỗi khi cập nhật nâng cấp' });
   }
 
-  // Lấy lại dữ liệu mới sau update
+  // Trả về dữ liệu mới
   const { data: updatedUser, error: fetchError } = await supabase
     .from('users')
     .select('coin, tap_level, energy_level')

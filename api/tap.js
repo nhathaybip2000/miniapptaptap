@@ -8,10 +8,10 @@ const supabase = createClient(
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { id, tapCount } = req.body;
+  const { id, tapCount, tapLevel } = req.body;
 
-  if (!id || !tapCount || tapCount < 1) {
-    return res.status(400).json({ error: 'Thiếu id hoặc số lần tap không hợp lệ' });
+  if (!id || !tapCount || tapCount < 1 || !tapLevel || tapLevel < 1) {
+    return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
   }
 
   // Lấy dữ liệu người dùng
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   const elapsed = now - lastTap;
 
   const energyLevel = user.energy_level || 1;
-  const tapLevel = user.tap_level || 1;
+  const tapLvl = user.tap_level || 1;
 
   const energyCap = 500 + (energyLevel - 1) * 200;
   const recoveryDuration = 30 * 60 * 1000; // 30 phút hồi full
@@ -41,16 +41,17 @@ export default async function handler(req, res) {
     Math.floor(elapsed * recoveryPerMs)
   );
 
-  if (recoveredEnergy < tapCount) {
+  // Tính năng lượng cần dùng = số lần tap * năng lượng mỗi tap
+  const energyRequired = tapCount * tapLevel;
+
+  if (recoveredEnergy < energyRequired) {
     return res.status(400).json({ error: 'Không đủ năng lượng để Tap' });
   }
 
-  const coinPerTap = tapLevel;
-  const totalCoinEarned = coinPerTap * tapCount;
+  const totalCoinEarned = tapCount * tapLevel;
 
-  // Cập nhật last_tap_at để phản ánh năng lượng đã dùng
-  const energyUsed = tapCount;
-  const remainingEnergy = recoveredEnergy - energyUsed;
+  // Tính lại thời gian `last_tap_at` mới
+  const remainingEnergy = recoveredEnergy - energyRequired;
   const newLastTapAt = new Date(now - remainingEnergy / recoveryPerMs).toISOString();
 
   const newCoin = user.coin + totalCoinEarned;
@@ -67,7 +68,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Lỗi khi cập nhật dữ liệu' });
   }
 
-  // Lấy lại dữ liệu mới nhất để client đồng bộ ngay
+  // Lấy lại dữ liệu mới nhất
   const { data: updatedUser, error: fetchError } = await supabase
     .from('users')
     .select('coin, last_tap_at, tap_level, energy_level')
