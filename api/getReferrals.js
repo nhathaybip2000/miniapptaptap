@@ -6,7 +6,11 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  const { id } = req.query;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Chỉ hỗ trợ POST' });
+  }
+
+  const { id } = req.body;
 
   if (!id) {
     return res.status(400).json({ error: 'Thiếu ID người dùng' });
@@ -15,15 +19,21 @@ export default async function handler(req, res) {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, username, first_name, coin, created_at')
+      .select('id, username, first_name, ref_bonus')
       .eq('ref_by', id)
-      .order('created_at', { ascending: false });
+      .order('id', { ascending: false });
 
     if (error) {
       return res.status(500).json({ error: error.message });
     }
 
-    return res.status(200).json({ referrals: data });
+    // ✅ Tính tổng xu thưởng từ các người bạn mời
+    const total_bonus = data.reduce((sum, user) => sum + (user.ref_bonus || 0), 0);
+
+    return res.status(200).json({
+      list: data,
+      total_bonus
+    });
   } catch (err) {
     return res.status(500).json({ error: 'Lỗi máy chủ' });
   }

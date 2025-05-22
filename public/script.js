@@ -3,7 +3,7 @@ tg.expand();
 
 const user = tg.initDataUnsafe?.user;
 const startParam = tg.initDataUnsafe?.start_param;
-const ref_by = startParam?.startsWith('r_') ? parseInt(startParam.slice(2)) : null;
+const ref_by = startParam?.startsWith('ref_') ? parseInt(startParam.slice(4)) : null;
 
 let coin = 0;
 let energy = 0;
@@ -35,26 +35,6 @@ function calculateEnergy(lastTime) {
   return Math.min(maxEnergy, Math.floor(maxEnergy * (elapsed / (30 * 60 * 1000))));
 }
 
-function loadReferrals(userId) {
-  fetch(`/api/getReferrals?id=${userId}`)
-    .then(res => res.json())
-    .then(data => {
-      const list = document.getElementById('referral-list');
-      list.innerHTML = '';
-      if (data.referrals.length === 0) {
-        list.innerHTML = '<p>Chưa có người nào được mời.</p>';
-      } else {
-        data.referrals.forEach(ref => {
-          const item = document.createElement('div');
-          item.className = 'referral-item';
-          item.innerHTML = `👤 ${ref.first_name || 'Người dùng'} (${ref.username || 'Ẩn'})`;
-          list.appendChild(item);
-        });
-      }
-    })
-    .catch(err => console.error('Lỗi khi tải danh sách giới thiệu:', err));
-}
-
 function updateUI() {
   const currentEnergy = calculateEnergy(lastTapAt) - pendingTaps * tapLevel;
   energy = Math.max(0, currentEnergy);
@@ -68,6 +48,33 @@ function updateUI() {
   energyCostEl.textContent = energyUpgradeCosts[energyLevel + 1] || 'MAX';
 }
 
+function loadReferrals(userId) {
+  fetch('/api/getReferrals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: userId })
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('ref-bonus').textContent = data.total_bonus || 0;
+      document.getElementById('ref-count').textContent = data.list.length || 0;
+
+      const listEl = document.getElementById('referrals');
+      listEl.innerHTML = '';
+
+      data.list.forEach(friend => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="ref-name">${friend.first_name || 'Người dùng'}</span>
+          <span class="ref-coins">+${friend.ref_bonus || 0} 💰</span>
+        `;
+        listEl.appendChild(li);
+      });
+    })
+    .catch(err => console.error('Lỗi khi tải danh sách mời:', err));
+}
+
+// ====== Khởi tạo =======
 if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
@@ -90,6 +97,13 @@ if (user) {
       maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       updateUI();
+
+      // ✅ Tạo link mời đúng bot
+      const inviteLink = `https://t.me/coinxutaptap_bot?start=ref_${user.id}`;
+      document.getElementById('invite-link').value = inviteLink;
+
+      // ✅ Tải danh sách bạn bè
+      loadReferrals(user.id);
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
@@ -98,6 +112,7 @@ if (user) {
   document.getElementById('greeting').textContent = 'Không thể lấy thông tin người dùng.';
 }
 
+// ===== Tap Logic =====
 let pendingTaps = 0;
 let debounceTimeout = null;
 
@@ -114,9 +129,9 @@ bigCoinEl.addEventListener('click', () => {
   coin += tapLevel;
   updateUI();
 
+  // Hiệu ứng
   bigCoinEl.classList.add('shake');
   setTimeout(() => bigCoinEl.classList.remove('shake'), 300);
-
   const plusOne = document.createElement('div');
   plusOne.textContent = `+${tapLevel}`;
   plusOne.className = 'plus-one';
@@ -132,7 +147,7 @@ bigCoinEl.addEventListener('click', () => {
     fetch('/api/tap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: user.id, tapCount: pendingTaps, tapLevel }) // ✅ gửi tapLevel
+      body: JSON.stringify({ id: user.id, tapCount: pendingTaps, tapLevel })
     })
       .then(res => res.json())
       .then(data => {
@@ -154,6 +169,7 @@ bigCoinEl.addEventListener('click', () => {
   }, 1000);
 });
 
+// ===== Nâng cấp Tap =====
 document.getElementById('upgrade-tap').addEventListener('click', () => {
   if (tapLevel >= maxLevel) return alert('Đã đạt cấp tối đa!');
   const cost = tapUpgradeCosts[tapLevel + 1];
@@ -177,6 +193,7 @@ document.getElementById('upgrade-tap').addEventListener('click', () => {
     });
 });
 
+// ===== Nâng cấp Năng Lượng =====
 document.getElementById('upgrade-energy').addEventListener('click', () => {
   if (energyLevel >= maxLevel) return alert('Đã đạt cấp tối đa!');
   const cost = energyUpgradeCosts[energyLevel + 1];
@@ -201,6 +218,7 @@ document.getElementById('upgrade-energy').addEventListener('click', () => {
     });
 });
 
+// ===== Copy Link =====
 document.getElementById('copy-link').addEventListener('click', () => {
   const linkInput = document.getElementById('invite-link');
   linkInput.select();
@@ -208,6 +226,7 @@ document.getElementById('copy-link').addEventListener('click', () => {
   alert('Đã sao chép link!');
 });
 
+// ===== Chuyển Tab =====
 document.querySelectorAll('nav.menu button').forEach(button => {
   button.addEventListener('click', () => {
     const targetTab = button.getAttribute('data-tab');
