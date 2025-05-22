@@ -21,18 +21,27 @@ export default async function handler(req, res) {
 
     // Nếu người dùng đã tồn tại
     if (existing) {
-      // ✅ Nếu chưa có ref_by và ref_by được gửi lên hợp lệ thì cập nhật
       const validRef = ref_by && ref_by !== id && !existing.ref_by;
+      console.log('[DEBUG] User tồn tại:', id, 'ref_by gửi lên:', ref_by, 'validRef:', validRef);
+    
       if (validRef) {
-        await supabase
+        const { error: updateRefErr } = await supabase
           .from('users')
           .update({ ref_by: ref_by })
           .eq('id', id);
-        existing.ref_by = ref_by; // cập nhật local object
+          
+        if (updateRefErr) {
+          console.error('[ERROR] Không thể update ref_by:', updateRefErr.message);
+        } else {
+          console.log('[SUCCESS] Đã cập nhật ref_by cho user:', id);
+        }
+    
+        existing.ref_by = ref_by;
       }
-
+    
       return res.status(200).json(existing);
     }
+    
 
     // Nếu lỗi không phải do không tìm thấy thì trả lỗi
     if (getError && getError.code !== 'PGRST116') {

@@ -84,16 +84,17 @@ if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
 
-  fetch('/api/getUser', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: user.id,
-      username: user.username,
-      first_name: user.first_name,
-      ref_by: ref_by
+    fetch('/api/getUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        ref_by: ref_by || null
+      })
     })
-  })
+    
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
