@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  const { id, first_name, username } = req.body;
+  const { id, first_name, username, ref_by } = req.body; // <-- nhận thêm ref_by từ frontend
 
   if (!id) {
     return res.status(400).json({ error: 'Thiếu ID người dùng' });
@@ -24,14 +24,13 @@ export default async function handler(req, res) {
       return res.status(200).json(existing);
     }
 
-    // Nếu không tìm thấy (lỗi code PGRST116) thì tạo mới
+    // Nếu lỗi không phải do chưa tồn tại (PGRST116) thì trả lỗi
     if (getError && getError.code !== 'PGRST116') {
       return res.status(500).json({ error: getError.message });
     }
 
-    // ✅ Lấy ref từ Telegram Mini App (nếu có)
-    const referrerId = req.body.ref_by; // 👈 bạn sẽ truyền ref_by từ frontend
-    const validRef = referrerId && referrerId !== id;
+    // ✅ Kiểm tra ref_by hợp lệ (không được tự giới thiệu chính mình)
+    const validRef = ref_by && ref_by !== id;
 
     const { data: created, error: insertError } = await supabase
       .from('users')
@@ -43,7 +42,7 @@ export default async function handler(req, res) {
         last_tap_at: null,
         tap_level: 1,
         energy_level: 1,
-        ref_by: validRef ? referrerId : null,
+        ref_by: validRef ? ref_by : null, // <-- gán ref_by nếu hợp lệ
         ref_bonus: 0
       }])
       .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
