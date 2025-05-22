@@ -54,11 +54,38 @@
       <p>💥 Tính năng đang phát triển...</p>
     </section>
 
-    <!-- Tab: Mời Bạn Bè -->
-    <section id="tab-moibanbe" class="tab">
-      <h2>Mời Bạn Bè</h2>
-      <p>🔗 Chia sẻ link giới thiệu và nhận thưởng!</p>
-    </section>
+       <!-- Tab: Mời Bạn Bè -->
+<section id="tab-moibanbe" class="tab">
+  <h2>Mời Bạn Bè</h2>
+
+  <div class="ref-section">
+    <p><strong>🎁 Thưởng mời:</strong> <span id="ref-bonus">0</span> 💰</p>
+    <p><strong>👥 Bạn đã mời:</strong> <span id="ref-count">0</span></p>
+
+    <div class="invite-box">
+      <p><strong>🔗 Link giới thiệu của bạn:</strong></p>
+      <div class="invite-link">
+        <input type="text" id="invite-link" readonly value="https://t.me/your_bot?start=ref_123456" />
+        <button id="copy-link">Copy</button>
+      </div>
+    </div>
+
+    <div class="ref-list">
+      <h3>Danh sách bạn bè:</h3>
+      <ul id="referrals">
+        <!-- Mẫu hiển thị 1 người bạn -->
+        <!--
+        <li>
+          <span class="ref-name">Mr Hh</span>
+          <span class="ref-coins">+0 💰</span>
+        </li>
+        -->
+      </ul>
+    </div>
+  </div>
+</section>
+
+
 
     <!-- Tab: Tài Khoản -->
     <section id="tab-taikhoan" class="tab">

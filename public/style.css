@@ -212,3 +212,63 @@ header .welcome {
 .upgrade-section button:active {
   transform: scale(0.97);
 }
+
+
+
+.ref-section {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 10px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+.invite-box {
+  margin: 12px 0;
+}
+
+.invite-link {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.invite-link input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: white;
+}
+
+.invite-link button {
+  background: #5e5eff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ref-list ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.ref-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #333;
+  font-size: 14px;
+}
+
+.ref-name {
+  font-weight: bold;
+}
+
+.ref-coins {
+  color: gold;
+}

@@ -2,6 +2,8 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const user = tg.initDataUnsafe?.user;
+const startParam = tg.initDataUnsafe?.start_param;
+const ref_by = startParam?.startsWith('r_') ? parseInt(startParam.slice(2)) : null;
 
 let coin = 0;
 let energy = 0;
@@ -33,6 +35,26 @@ function calculateEnergy(lastTime) {
   return Math.min(maxEnergy, Math.floor(maxEnergy * (elapsed / (30 * 60 * 1000))));
 }
 
+function loadReferrals(userId) {
+  fetch(`/api/getReferrals?id=${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('referral-list');
+      list.innerHTML = '';
+      if (data.referrals.length === 0) {
+        list.innerHTML = '<p>Chưa có người nào được mời.</p>';
+      } else {
+        data.referrals.forEach(ref => {
+          const item = document.createElement('div');
+          item.className = 'referral-item';
+          item.innerHTML = `👤 ${ref.first_name || 'Người dùng'} (${ref.username || 'Ẩn'})`;
+          list.appendChild(item);
+        });
+      }
+    })
+    .catch(err => console.error('Lỗi khi tải danh sách giới thiệu:', err));
+}
+
 function updateUI() {
   const currentEnergy = calculateEnergy(lastTapAt) - pendingTaps * tapLevel;
   energy = Math.max(0, currentEnergy);
@@ -56,7 +78,8 @@ if (user) {
     body: JSON.stringify({
       id: user.id,
       username: user.username,
-      first_name: user.first_name
+      first_name: user.first_name,
+      ref_by: ref_by
     })
   })
     .then(res => res.json())
@@ -176,6 +199,13 @@ document.getElementById('upgrade-energy').addEventListener('click', () => {
         alert('Lỗi nâng cấp năng lượng.');
       }
     });
+});
+
+document.getElementById('copy-link').addEventListener('click', () => {
+  const linkInput = document.getElementById('invite-link');
+  linkInput.select();
+  document.execCommand('copy');
+  alert('Đã sao chép link!');
 });
 
 document.querySelectorAll('nav.menu button').forEach(button => {

@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     // Tìm user đã tồn tại
     const { data: existing, error: getError } = await supabase
       .from('users')
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
       .eq('id', id)
       .single();
 
@@ -29,6 +29,10 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: getError.message });
     }
 
+    // ✅ Lấy ref từ Telegram Mini App (nếu có)
+    const referrerId = req.body.ref_by; // 👈 bạn sẽ truyền ref_by từ frontend
+    const validRef = referrerId && referrerId !== id;
+
     const { data: created, error: insertError } = await supabase
       .from('users')
       .insert([{
@@ -38,9 +42,11 @@ export default async function handler(req, res) {
         coin: 0,
         last_tap_at: null,
         tap_level: 1,
-        energy_level: 1
+        energy_level: 1,
+        ref_by: validRef ? referrerId : null,
+        ref_bonus: 0
       }])
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
       .single();
 
     if (insertError) {
