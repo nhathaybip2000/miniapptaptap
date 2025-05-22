@@ -84,16 +84,15 @@ if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
 
-    fetch('/api/getUser', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: user.id,
-        username: user.username,
-        first_name: user.first_name
-      })
+  fetch('/api/getUser', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: user.id,
+      username: user.username,
+      first_name: user.first_name
     })
-    
+  })
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
@@ -107,6 +106,13 @@ if (user) {
       document.getElementById('invite-link').value = inviteLink;
 
       loadReferrals(user.id);
+
+
+      // ✅ Chỉ hiện modal nếu không có ref_by
+      const alreadyShown = localStorage.getItem('referral_done');
+      if (!alreadyShown && !ref_by) {
+        showReferralModal();
+      }
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
@@ -252,7 +258,6 @@ const skipBtn = document.getElementById('referral-skip');
 
 function showReferralModal() {
   console.log('[DEBUG] Hiển thị modal nhập mã mời');
-  const modal = document.getElementById('referral-modal');
   modal.classList.add('show');
 }
 
