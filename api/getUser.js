@@ -13,6 +13,17 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Kiểm tra ref_by có hợp lệ không
+    let validRef = false;
+    if (ref_by && ref_by !== id) {
+      const { data: refUser, error: refError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', ref_by)
+        .single();
+      validRef = !!refUser && !refError;
+    }
+
     const { data: existing, error: getError } = await supabase
       .from('users')
       .select('*')
@@ -21,27 +32,23 @@ export default async function handler(req, res) {
 
     // ❗ Nếu user đã tồn tại
     if (existing) {
-      // ⚡ Nếu user chưa có ref_by nhưng có ref_by hợp lệ từ client
-      const validRef = ref_by && ref_by !== id && !existing.ref_by;
-
-      if (validRef) {
+      // ⚡ Nếu user chưa có ref_by và ref_by là hợp lệ
+      if (validRef && !existing.ref_by) {
         await supabase
           .from('users')
           .update({ ref_by })
           .eq('id', id);
       }
 
-      return res.status(200).json({ ...existing, ref_by: existing.ref_by || ref_by });
+      return res.status(200).json({ ...existing, ref_by: existing.ref_by || (validRef ? ref_by : null) });
     }
 
-    // Nếu lỗi không phải vì không tìm thấy (PGRST116) thì báo lỗi
+    // Nếu lỗi không phải vì không tìm thấy
     if (getError && getError.code !== 'PGRST116') {
       return res.status(500).json({ error: getError.message });
     }
 
-    // Tạo user mới nếu chưa có
-    const validRef = ref_by && ref_by !== id;
-
+    // Tạo user mới
     const { data: created, error: insertError } = await supabase
       .from('users')
       .insert([{
