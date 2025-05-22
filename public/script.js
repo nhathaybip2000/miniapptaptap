@@ -243,3 +243,43 @@ document.querySelectorAll('nav.menu button').forEach(button => {
     document.getElementById('tab-' + targetTab).classList.add('active');
   });
 });
+
+// Hiển thị modal nhập mã mời nếu user chưa có ref_by và chưa bỏ qua
+const refSkipped = localStorage.getItem('ref_skipped');
+const storedRef = localStorage.getItem('ref_by');
+
+if (!storedRef && !refSkipped && user) {
+  document.getElementById('ref-modal').style.display = 'flex';
+}
+
+// Xử lý xác nhận mã mời
+document.getElementById('submit-ref').addEventListener('click', () => {
+  const refInput = parseInt(document.getElementById('ref-input').value);
+  if (!refInput || refInput === user.id) {
+    alert('ID không hợp lệ hoặc trùng với chính bạn!');
+    return;
+  }
+
+  fetch('/api/setRef', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: user.id, ref_by: refInput })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem('ref_by', refInput);
+        document.getElementById('ref-modal').style.display = 'none';
+        alert('🎉 Lưu mã mời thành công!');
+      } else {
+        alert(data.message || '❌ Không thể lưu mã mời.');
+      }
+    })
+    .catch(() => alert('⚠️ Lỗi kết nối server!'));
+});
+
+// Xử lý khi user bấm "Bỏ qua"
+document.getElementById('skip-ref').addEventListener('click', () => {
+  localStorage.setItem('ref_skipped', true);
+  document.getElementById('ref-modal').style.display = 'none';
+});
