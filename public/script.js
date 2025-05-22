@@ -289,5 +289,7 @@ skipBtn.addEventListener('click', () => {
 
 // 👉 Gọi modal nếu chưa từng nhập/ref_by rỗng
 setTimeout(() => {
-  if (!ref_by) showReferralModal();
-}, 1500);
+  if (ref_by && !localStorage.getItem('referral_done')) {
+    showReferralModal();
+  }
+}, 1000);
