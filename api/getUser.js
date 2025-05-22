@@ -15,41 +15,33 @@ export default async function handler(req, res) {
   try {
     const { data: existing, error: getError } = await supabase
       .from('users')
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
+      .select('*')
       .eq('id', id)
       .single();
 
-    // Nếu người dùng đã tồn tại
+    // ❗ Nếu user đã tồn tại
     if (existing) {
+      // ⚡ Nếu user chưa có ref_by nhưng có ref_by hợp lệ từ client
       const validRef = ref_by && ref_by !== id && !existing.ref_by;
-      console.log('[DEBUG] User tồn tại:', id, 'ref_by gửi lên:', ref_by, 'validRef:', validRef);
-    
-      if (validRef) {
-        const { error: updateRefErr } = await supabase
-          .from('users')
-          .update({ ref_by: ref_by })
-          .eq('id', id);
-          
-        if (updateRefErr) {
-          console.error('[ERROR] Không thể update ref_by:', updateRefErr.message);
-        } else {
-          console.log('[SUCCESS] Đã cập nhật ref_by cho user:', id);
-        }
-    
-        existing.ref_by = ref_by;
-      }
-    
-      return res.status(200).json(existing);
-    }
-    
 
-    // Nếu lỗi không phải do không tìm thấy thì trả lỗi
+      if (validRef) {
+        await supabase
+          .from('users')
+          .update({ ref_by })
+          .eq('id', id);
+      }
+
+      return res.status(200).json({ ...existing, ref_by: existing.ref_by || ref_by });
+    }
+
+    // Nếu lỗi không phải vì không tìm thấy (PGRST116) thì báo lỗi
     if (getError && getError.code !== 'PGRST116') {
       return res.status(500).json({ error: getError.message });
     }
 
-    // ✅ Nếu là người dùng mới → tạo mới
+    // Tạo user mới nếu chưa có
     const validRef = ref_by && ref_by !== id;
+
     const { data: created, error: insertError } = await supabase
       .from('users')
       .insert([{
@@ -63,7 +55,7 @@ export default async function handler(req, res) {
         ref_by: validRef ? ref_by : null,
         ref_bonus: 0
       }])
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
+      .select('*')
       .single();
 
     if (insertError) {
@@ -71,6 +63,7 @@ export default async function handler(req, res) {
     }
 
     return res.status(200).json(created);
+
   } catch (err) {
     return res.status(500).json({ error: 'Lỗi máy chủ' });
   }
