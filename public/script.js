@@ -84,15 +84,17 @@ if (user) {
   document.getElementById('greeting').innerHTML =
     `Xin chào <b>${user.first_name}</b> (ID: <span style="color: orange">${user.id}</span>) 👋`;
 
-  fetch('/api/getUser', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      id: user.id,
-      username: user.username,
-      first_name: user.first_name
+    fetch('/api/getUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        ref_by: ref_by || null
+      })
     })
-  })
+    
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
@@ -106,13 +108,6 @@ if (user) {
       document.getElementById('invite-link').value = inviteLink;
 
       loadReferrals(user.id);
-
-
-      // ✅ Chỉ hiện modal nếu không có ref_by
-      const alreadyShown = localStorage.getItem('referral_done');
-      if (!alreadyShown && !ref_by) {
-        showReferralModal();
-      }
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
@@ -250,53 +245,3 @@ document.querySelectorAll('nav.menu button').forEach(button => {
     document.getElementById('tab-' + targetTab).classList.add('active');
   });
 });
-// ===== Xử lý Modal nhập mã mời =====
-const modal = document.getElementById('referral-modal');
-const refInput = document.getElementById('referral-input');
-const confirmBtn = document.getElementById('referral-confirm');
-const skipBtn = document.getElementById('referral-skip');
-
-function showReferralModal() {
-  console.log('[DEBUG] Hiển thị modal nhập mã mời');
-  modal.classList.add('show');
-}
-
-
-// Gửi ref_by thủ công
-confirmBtn.addEventListener('click', () => {
-  const refId = parseInt(refInput.value.trim());
-  if (!refId || isNaN(refId)) {
-    alert('Vui lòng nhập ID hợp lệ!');
-    return;
-  }
-
-  fetch('/api/setRefBy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: user.id, ref_by: refId })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        alert('Cập nhật mã mời thành công!');
-        modal.classList.remove('show');
-        localStorage.setItem('referral_done', '1');
-      } else {
-        alert(data.error || 'Đã có lỗi xảy ra.');
-      }
-    });
-});
-
-// Bỏ qua nhập mã mời
-skipBtn.addEventListener('click', () => {
-  modal.classList.remove('show');
-  localStorage.setItem('referral_done', '1');
-});
-
-setTimeout(() => {
-  const alreadyShown = localStorage.getItem('referral_done');
-  if (!alreadyShown) {
-    showReferralModal();
-  }
-}, 1000);
-
