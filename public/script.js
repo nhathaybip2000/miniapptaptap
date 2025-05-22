@@ -245,3 +245,49 @@ document.querySelectorAll('nav.menu button').forEach(button => {
     document.getElementById('tab-' + targetTab).classList.add('active');
   });
 });
+// ===== Xử lý Modal nhập mã mời =====
+const modal = document.getElementById('referral-modal');
+const refInput = document.getElementById('referral-input');
+const confirmBtn = document.getElementById('referral-confirm');
+const skipBtn = document.getElementById('referral-skip');
+
+function showReferralModal() {
+  if (localStorage.getItem('referral_done')) return;
+  modal.classList.add('show');
+}
+
+// Gửi ref_by thủ công
+confirmBtn.addEventListener('click', () => {
+  const refId = parseInt(refInput.value.trim());
+  if (!refId || isNaN(refId)) {
+    alert('Vui lòng nhập ID hợp lệ!');
+    return;
+  }
+
+  fetch('/api/setRefBy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: user.id, ref_by: refId })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert('Cập nhật mã mời thành công!');
+        modal.classList.remove('show');
+        localStorage.setItem('referral_done', '1');
+      } else {
+        alert(data.error || 'Đã có lỗi xảy ra.');
+      }
+    });
+});
+
+// Bỏ qua nhập mã mời
+skipBtn.addEventListener('click', () => {
+  modal.classList.remove('show');
+  localStorage.setItem('referral_done', '1');
+});
+
+// 👉 Gọi modal nếu chưa từng nhập/ref_by rỗng
+setTimeout(() => {
+  if (!ref_by) showReferralModal();
+}, 1500);
