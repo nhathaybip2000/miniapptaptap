@@ -2,8 +2,7 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const user = tg.initDataUnsafe?.user;
-const startParam = tg.initDataUnsafe?.start_param;
-const ref_by = startParam?.startsWith('ref_') ? parseInt(startParam.slice(4)) : null;
+
 
 let coin = 0;
 let energy = 0;
@@ -90,8 +89,7 @@ if (user) {
       body: JSON.stringify({
         id: user.id,
         username: user.username,
-        first_name: user.first_name,
-        ref_by: ref_by || null
+        first_name: user.first_name
       })
     })
     
