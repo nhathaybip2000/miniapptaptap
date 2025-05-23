@@ -71,13 +71,11 @@ if (user) {
       maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       updateUI();
-    
-      // 👇 Kiểm tra nếu chưa có ref_by và modal vẫn đang là "no" thì show modal
-      if (data.modal === 'yes') {
+
+      if (!data.ref_by && data.modal !== 'no') {
         showReferralModal();
-      }
+      }      
     })
-    
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
   setInterval(updateUI, 5000);
