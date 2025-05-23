@@ -211,6 +211,7 @@ function showReferralModal() {
   modal.classList.add('show');
 }
 
+// 👉 Xác nhận mã mời
 confirmBtn.addEventListener('click', () => {
   const refId = parseInt(refInput.value.trim());
   if (!refId || isNaN(refId) || refId === user.id) {
@@ -226,37 +227,39 @@ confirmBtn.addEventListener('click', () => {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        fetch('/api/updateModal', {
+        // 👇 Cập nhật modal = yes luôn sau khi nhập thành công
+        fetch('/api/setModal', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: user.id })
         });
-      
+
         alert('🎉 Nhập mã mời thành công!');
         modal.classList.remove('show');
         localStorage.setItem('referral_done', '1');
-      
       } else {
         alert(data.error || 'Đã xảy ra lỗi.');
       }
     });
 });
 
+// 👉 Nhấn bỏ qua
 skipBtn.addEventListener('click', () => {
   fetch('/api/setModal', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: user.id, modal: 'yes' })
+    body: JSON.stringify({ id: user.id })
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      modal.classList.remove('show');
-      localStorage.setItem('referral_done', '1');
-    } else {
-      alert('Không thể cập nhật trạng thái modal');
-    }
-  })
-  .catch(() => alert('Lỗi khi gọi API setModal'));
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        modal.classList.remove('show');
+        localStorage.setItem('referral_done', '1');
+      } else {
+        alert('Không thể cập nhật trạng thái modal');
+      }
+    })
+    .catch(() => alert('Lỗi khi gọi API setModal'));
 });
+
 
