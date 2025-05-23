@@ -242,16 +242,20 @@ confirmBtn.addEventListener('click', () => {
 });
 
 skipBtn.addEventListener('click', () => {
-  fetch('/api/updateModal', {
+  fetch('/api/setModal', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: user.id })
+    body: JSON.stringify({ id: user.id, modal: 'yes' })
   })
-    .then(() => {
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
       modal.classList.remove('show');
       localStorage.setItem('referral_done', '1');
-    })
-    .catch(() => {
+    } else {
       alert('Không thể cập nhật trạng thái modal');
-    });
+    }
+  })
+  .catch(() => alert('Lỗi khi gọi API setModal'));
 });
+

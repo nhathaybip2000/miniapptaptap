@@ -6,26 +6,22 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
+  if (req.method !== 'POST') return res.status(405).end();
 
-  const { id } = req.body;
+  const { id, modal } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: 'Thiếu ID người dùng' });
+  if (!id || !['yes', 'no'].includes(modal)) {
+    return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
   }
 
-  try {
-    const { error } = await supabase
-      .from('users')
-      .update({ modal: 'yes' })
-      .eq('id', id);
+  const { error } = await supabase
+    .from('users')
+    .update({ modal })
+    .eq('id', id);
 
-    if (error) {
-      return res.status(500).json({ error: 'Lỗi khi cập nhật modal' });
-    }
-
-    return res.status(200).json({ success: true });
-  } catch (err) {
-    return res.status(500).json({ error: 'Lỗi máy chủ' });
+  if (error) {
+    return res.status(500).json({ error: error.message });
   }
+
+  return res.status(200).json({ success: true });
 }
