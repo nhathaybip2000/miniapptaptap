@@ -165,7 +165,6 @@ body {
   color: white;
   max-width: 420px;
   margin: auto;
-  padding-top: 40px; /* ✅ tránh sát top */
 }
 .tab.active {
   display: block;
