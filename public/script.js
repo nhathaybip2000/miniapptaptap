@@ -71,6 +71,10 @@ if (user) {
       maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       updateUI();
+      
+      if (!data.ref_by && !localStorage.getItem('referral_done')) {
+        showReferralModal();
+      }
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
