@@ -6,56 +6,29 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  const { id, first_name, username, ref_by } = req.body;
+  const { id, first_name, username } = req.body;
 
   if (!id) {
     return res.status(400).json({ error: 'Thiếu ID người dùng' });
   }
 
   try {
-    // Kiểm tra ref_by có hợp lệ không
-    let validRef = false;
-    if (ref_by && ref_by !== id) {
-      const { data: refUser, error: refError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('id', ref_by)
-        .single();
-      validRef = !!refUser && !refError;
-    }
-
+    // Tìm user đã tồn tại
     const { data: existing, error: getError } = await supabase
       .from('users')
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level')
       .eq('id', id)
       .single();
 
-    // ❗ Nếu user đã tồn tại
     if (existing) {
-      if (validRef && !existing.ref_by) {
-        await supabase
-          .from('users')
-          .update({ ref_by })
-          .eq('id', id);
-      }
-    
-      // Lấy lại dữ liệu mới nhất sau khi update
-      const { data: updatedUser } = await supabase
-        .from('users')
-        .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
-        .eq('id', id)
-        .single();
-    
-      return res.status(200).json(updatedUser);
+      return res.status(200).json(existing);
     }
-    
 
-    // Nếu lỗi không phải vì không tìm thấy
+    // Nếu không tìm thấy (lỗi code PGRST116) thì tạo mới
     if (getError && getError.code !== 'PGRST116') {
       return res.status(500).json({ error: getError.message });
     }
 
-    // Tạo user mới
     const { data: created, error: insertError } = await supabase
       .from('users')
       .insert([{
@@ -65,11 +38,9 @@ export default async function handler(req, res) {
         coin: 0,
         last_tap_at: null,
         tap_level: 1,
-        energy_level: 1,
-        ref_by: validRef ? ref_by : null,
-        ref_bonus: 0
+        energy_level: 1
       }])
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level')
       .single();
 
     if (insertError) {
