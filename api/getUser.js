@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     // Tìm user đã tồn tại
     const { data: existing, error: getError } = await supabase
       .from('users')
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus, modal')
       .eq('id', id)
       .single();
 
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
         tap_level: 1,
         energy_level: 1
       }])
-      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus, modal')
       .single();
 
     if (insertError) {
