@@ -27,7 +27,6 @@ body {
   margin: auto;
   padding: 24px 20px 100px;
   background-color: #1e1e1e;
-  border-radius: 20px;
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
   min-height: 100vh;
 }
