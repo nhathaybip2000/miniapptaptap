@@ -72,7 +72,7 @@ if (user) {
       lastTapAt = data.last_tap_at;
       updateUI();
 
-      if (!data.ref_by && data.modal !== 'no') {
+      if (!data.modal !== 'no') {
         showReferralModal();
       }      
     })
