@@ -71,10 +71,10 @@ if (user) {
       maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       updateUI();
-      
-      if (!data.ref_by && !localStorage.getItem('referral_done')) {
+
+      if (!data.ref_by && data.modal !== 'yes') {
         showReferralModal();
-      }
+      }      
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
@@ -200,13 +200,13 @@ document.querySelectorAll('nav.menu button').forEach(button => {
 
 
 
+// ===== Referral Modal =====
 const modal = document.getElementById('referral-modal');
 const refInput = document.getElementById('referral-input');
 const confirmBtn = document.getElementById('referral-confirm');
 const skipBtn = document.getElementById('referral-skip');
 
 function showReferralModal() {
-  if (localStorage.getItem('referral_done')) return;
   modal.classList.add('show');
 }
 
@@ -227,7 +227,12 @@ confirmBtn.addEventListener('click', () => {
       if (data.success) {
         alert('🎉 Nhập mã mời thành công!');
         modal.classList.remove('show');
-        localStorage.setItem('referral_done', '1');
+        // Gọi API cập nhật modal = yes
+        fetch('/api/updateModal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: user.id })
+        });
       } else {
         alert(data.error || 'Đã xảy ra lỗi.');
       }
@@ -236,12 +241,9 @@ confirmBtn.addEventListener('click', () => {
 
 skipBtn.addEventListener('click', () => {
   modal.classList.remove('show');
-  localStorage.setItem('referral_done', '1');
+  fetch('/api/updateModal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: user.id })
+  });
 });
-
-// Gọi modal sau khi user đã load thành công
-setTimeout(() => {
-  if (!localStorage.getItem('referral_done')) {
-    showReferralModal();
-  }
-}, 1500);
