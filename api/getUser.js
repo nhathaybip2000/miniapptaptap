@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
     const { data: existing, error: getError } = await supabase
       .from('users')
-      .select('*')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
       .eq('id', id)
       .single();
 
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       // Lấy lại dữ liệu mới nhất sau khi update
       const { data: updatedUser } = await supabase
         .from('users')
-        .select('*')
+        .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
         .eq('id', id)
         .single();
     
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
         ref_by: validRef ? ref_by : null,
         ref_bonus: 0
       }])
-      .select('*')
+      .select('id, username, first_name, coin, last_tap_at, tap_level, energy_level, ref_by, ref_bonus')
       .single();
 
     if (insertError) {

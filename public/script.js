@@ -107,11 +107,12 @@ if (user) {
     
       loadReferrals(user.id);
     
-      // 👉 Nếu user chưa có ref_by và chưa từng bỏ qua → hiện modal
+      // 👇 Hiện modal nếu chưa từng nhập mã mời và ref_by vẫn null
       if (!data.ref_by && !localStorage.getItem('referral_done')) {
         showReferralModal();
       }
     })
+    
     
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
