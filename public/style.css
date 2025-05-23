@@ -1,4 +1,4 @@
-/* Reset & Font */
+/* ⚙️ Reset & Font */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,10 +6,12 @@
   font-family: 'Fredoka', sans-serif;
 }
 
+
 html, body {
   height: 100%;
   background: #121212;
   color: white;
+  scroll-behavior: smooth;
 }
 
 /* Body không dùng flex để tránh dồn giữa */
@@ -21,36 +23,40 @@ body {
 .container {
   width: 100%;
   max-width: 420px;
-  background-color: #1e1e1e;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
   margin: auto;
+  padding: 24px 20px 100px;
+  background-color: #1e1e1e;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
   min-height: 100vh;
-  padding-bottom: 100px; /* tránh menu che nội dung */
 }
 
-/* Header */
+/* 👋 Welcome */
 .welcome p {
   font-size: 18px;
   text-align: center;
-  margin-bottom: 20px;
-  color: #555;
+  margin-bottom: 24px;
+  color: #aaa;
 }
 
-/* Balance Section */
+/* 💰 Balance */
+.balance {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
 .balance p {
-  font-size: 18px;
-  color: #bbb;
+  font-size: 16px;
+  color: #ccc;
 }
 
 .balance h2 {
   font-size: 36px;
-  margin: 10px 0;
+  margin-top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .coin-icon {
@@ -58,42 +64,97 @@ body {
   height: 36px;
 }
 
-/* Pet Coin */
+/* 🐾 Pet Image */
 .pet {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 .pet img {
   width: 200px;
   transition: transform 0.2s ease;
 }
 .pet img:active {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
-/* Energy Bar */
+/* ⚡ Energy Bar */
 .energy-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 20px 0;
   justify-content: center;
   font-size: 14px;
+  margin-bottom: 24px;
 }
 .bar {
   flex: 1;
-  height: 16px;
+  max-width: 240px;
+  height: 14px;
   background: #333;
   border-radius: 10px;
   overflow: hidden;
-  max-width: 240px;
 }
 .fill {
   height: 100%;
-  background: #00FF00;
   width: 0%;
+  background: linear-gradient(to right, #00ff88, #00ffaa);
   border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+/* ⬆️ Upgrade Buttons */
+.upgrade-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.upgrade-section button {
+  background: linear-gradient(to right, #f9c74f, #f9844a);
+  color: #121212;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  transition: transform 0.1s ease, box-shadow 0.2s;
+}
+
+.upgrade-section button:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* 🌈 Animation: Shake + +1 Coin */
+.shake {
+  animation: shake 0.3s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(4deg); }
+  50% { transform: rotate(-4deg); }
+  75% { transform: rotate(2deg); }
+}
+
+/* Hiệu ứng +1 */
+.plus-one {
+  position: absolute;
+  font-size: 20px;
+  color: yellow;
+  font-weight: bold;
+  animation: floatUp 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-40px); opacity: 0; }
 }
 
 /* Tab nội dung */
@@ -110,110 +171,67 @@ body {
   display: block;
 }
 
-/* Menu Navigation (Bottom bar fixed) */
+/* 📱 Bottom Menu */
 .menu {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: #1e1e1e;
-  padding: 10px 20px;
+  max-width: 420px;
+  margin: auto;
   display: flex;
   justify-content: space-around;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.4);
+  background: #1e1e1e;
+  padding: 10px 16px;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-  max-width: 420px;
-  margin: 0 auto;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
   z-index: 10;
 }
+
 .menu button {
-  background: #222;
-  color: white;
-  border: none;
-  border-radius: 16px;
-  padding: 12px 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: #222;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 10px;
   font-size: 13px;
-  transition: background 0.3s;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-  margin: 0 5px;
+  margin: 0 4px;
+  transition: background 0.3s ease;
 }
 .menu button:hover {
   background: #333;
 }
 .icon {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 6px;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
 }
 
-/* Responsive cho màn nhỏ */
+/* 🔁 Responsive */
 @media screen and (max-width: 360px) {
   .menu {
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+    gap: 8px;
   }
   .menu button {
     flex: 0 0 45%;
-    margin: 5px 0;
+    margin-bottom: 4px;
   }
 }
 
-/* Hiệu ứng rung */
-.shake {
-  animation: shake 0.3s;
-}
-@keyframes shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  50% { transform: rotate(-5deg); }
-  75% { transform: rotate(3deg); }
-}
 
-/* Hiệu ứng +1 */
-.plus-one {
-  font-size: 20px;
-  color: yellow;
-  font-weight: bold;
-  animation: floatUp 1s ease-out forwards;
-  pointer-events: none;
-  position: absolute;
-  z-index: 1000;
-}
-@keyframes floatUp {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-40px); opacity: 0; }
-}
 
-.upgrade-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 16px 0;
-  padding: 0 20px;
-}
 
-.upgrade-section button {
-  background-color: #f9c74f;
-  color: #333;
-  border: none;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  font-family: 'Fredoka', sans-serif;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: transform 0.1s ease;
-}
 
-.upgrade-section button:active {
-  transform: scale(0.97);
-}
+
+
+
+
 
 
 
