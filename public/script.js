@@ -73,7 +73,7 @@ if (user) {
       updateUI();
     
       // 👇 Kiểm tra nếu chưa có ref_by và modal vẫn đang là "no" thì show modal
-      if (!data.ref_by && data.modal === 'no') {
+      if (data.modal === 'no') {
         showReferralModal();
       }
     })
