@@ -225,72 +225,103 @@ body {
 
 
 
-
-
-
-
-
-
-
-
-
+/* 📣 Mời Bạn Bè */
 .ref-section {
-  background: #1e1e1e;
-  border-radius: 12px;
-  padding: 16px;
-  margin-top: 10px;
-  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+  background: #2a2a2a;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  color: white;
+  font-size: 16px;
+}
+
+.ref-section p {
+  margin: 8px 0;
 }
 
 .invite-box {
-  margin: 12px 0;
+  margin-top: 20px;
+  background: #1e1e1e;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
 }
 
 .invite-link {
   display: flex;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .invite-link input {
   flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #444;
   background: #333;
-  color: white;
+  color: #fff;
+  font-size: 14px;
 }
 
 .invite-link button {
   background: #5e5eff;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.invite-link button:hover {
+  background: #7878ff;
+}
+
+/* Danh sách bạn bè được mời */
+.ref-list {
+  margin-top: 24px;
+}
+
+.ref-list h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .ref-list ul {
   list-style: none;
   padding: 0;
-  margin-top: 10px;
+  margin: 0;
+  border-top: 1px solid #444;
 }
 
 .ref-list li {
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid #333;
-  font-size: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #444;
+  background: #262626;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: background 0.2s;
+}
+.ref-list li:hover {
+  background: #2e2e2e;
 }
 
 .ref-name {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 15px;
+  color: #f0f0f0;
 }
 
 .ref-coins {
-  color: gold;
+  color: #ffcc00;
+  font-weight: bold;
+  font-size: 15px;
 }
+
 
 /* ==== Modal Overlay ==== */
 .modal {
