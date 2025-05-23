@@ -225,14 +225,16 @@ confirmBtn.addEventListener('click', () => {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        alert('🎉 Nhập mã mời thành công!');
-        modal.classList.remove('show');
-        // Gọi API cập nhật modal = yes
         fetch('/api/updateModal', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: user.id })
         });
+      
+        alert('🎉 Nhập mã mời thành công!');
+        modal.classList.remove('show');
+        localStorage.setItem('referral_done', '1');
+      
       } else {
         alert(data.error || 'Đã xảy ra lỗi.');
       }
@@ -240,10 +242,16 @@ confirmBtn.addEventListener('click', () => {
 });
 
 skipBtn.addEventListener('click', () => {
-  modal.classList.remove('show');
   fetch('/api/updateModal', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id: user.id })
-  });
+  })
+    .then(() => {
+      modal.classList.remove('show');
+      localStorage.setItem('referral_done', '1');
+    })
+    .catch(() => {
+      alert('Không thể cập nhật trạng thái modal');
+    });
 });
