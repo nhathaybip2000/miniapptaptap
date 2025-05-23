@@ -31,9 +31,11 @@ body {
 }
 
 /* Header */
-.welcome {
-  font-size: 16px;
-  margin-bottom: 16px;
+.welcome p {
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #555;
 }
 
 /* Balance Section */
