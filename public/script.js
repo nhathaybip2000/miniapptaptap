@@ -47,6 +47,37 @@ function updateUI() {
   energyCostEl.textContent = energyUpgradeCosts[energyLevel + 1] || 'MAX';
 }
 
+function loadReferrals(userId) {
+  fetch('/api/getReferrals', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: userId })
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('ref-bonus').textContent = data.total_bonus || 0;
+      document.getElementById('ref-count').textContent = data.list.length || 0;
+
+      const listEl = document.getElementById('referrals');
+      listEl.innerHTML = '';
+
+      if (!data.list || data.list.length === 0) {
+        listEl.innerHTML = '<li>Bạn chưa mời ai cả. Hãy chia sẻ link để nhận thưởng 💰</li>';
+        return;
+      }
+
+      data.list.forEach(friend => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="ref-name">${friend.first_name || 'Người dùng'}</span>
+          <span class="ref-coins">+${friend.ref_bonus || 0} 💰</span>
+        `;
+        listEl.appendChild(li);
+      });
+    })
+    .catch(err => console.error('Lỗi khi tải danh sách mời:', err));
+}
+
 
 // ====== Khởi tạo =======
 if (user) {
@@ -71,6 +102,11 @@ if (user) {
       maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       updateUI();
+
+      const inviteLink = `${user.id}`;
+      document.getElementById('invite-link').value = inviteLink;
+
+      loadReferrals(user.id);
 
       if (data.modal === 'no') {
         showReferralModal();
@@ -189,6 +225,21 @@ document.getElementById('upgrade-energy').addEventListener('click', () => {
     });
 });
 
+// ===== Copy Link mời bạn =====
+document.getElementById('copy-link').addEventListener('click', () => {
+  const link = document.getElementById('invite-link').value;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link)
+      .then(() => alert('Đã sao chép link!'))
+      .catch(() => alert('Không thể sao chép link.'));
+  } else {
+    const input = document.getElementById('invite-link');
+    input.select();
+    document.execCommand('copy');
+    alert('Đã sao chép link!');
+  }
+});
 
 // ===== Chuyển Tab =====
 document.querySelectorAll('nav.menu button').forEach(button => {
