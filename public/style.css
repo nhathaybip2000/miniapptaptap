@@ -317,6 +317,7 @@ body {
   text-align: center;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.3s ease;
+  margin: auto;
 }
 
 /* ==== Modal Title ==== */
@@ -379,4 +380,5 @@ body {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
 
