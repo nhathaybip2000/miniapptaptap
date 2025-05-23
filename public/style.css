@@ -9,9 +9,10 @@
 
 html, body {
   height: 100%;
-  background: #121212;
-  color: white;
-  scroll-behavior: smooth;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Body không dùng flex để tránh dồn giữa */

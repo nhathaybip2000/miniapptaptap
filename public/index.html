@@ -8,9 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <div class="container">
     <!-- Tab: Khai Thác -->
     <section id="tab-khaithac" class="tab active">
-      <div class="container">
           <div class="welcome">
             <p id="greeting">Đang tải thông tin người dùng...</p>
           </div>
@@ -52,24 +52,24 @@
     </section>
 
        <!-- Tab: Mời Bạn Bè -->
-<section id="tab-moibanbe" class="tab">
-  <h2>Mời Bạn Bè</h2>
+   <section id="tab-moibanbe" class="tab">
+      <h2>Mời Bạn Bè</h2>
+     
+      <div class="ref-section">
+       <p><strong>🎁 Thưởng mời:</strong> <span id="ref-bonus">0</span> 💰</p>
+       <p><strong>👥 Bạn đã mời:</strong> <span id="ref-count">0</span></p>
 
-  <div class="ref-section">
-    <p><strong>🎁 Thưởng mời:</strong> <span id="ref-bonus">0</span> 💰</p>
-    <p><strong>👥 Bạn đã mời:</strong> <span id="ref-count">0</span></p>
-
-    <div class="invite-box">
-      <p><strong>🔗 Link giới thiệu của bạn:</strong></p>
+      <div class="invite-box">
+       <p><strong>🔗 Link giới thiệu của bạn:</strong></p>
       <div class="invite-link">
-        <input type="text" id="invite-link" readonly value="" />
-        <button id="copy-link">Copy</button>
+       <input type="text" id="invite-link" readonly value="" />
+       <button id="copy-link">Copy</button>
       </div>      
-    </div>
+      </div>
 
     <div class="ref-list">
       <h3>Danh sách bạn bè:</h3>
-      <ul id="referrals">
+        <ul id="referrals">
         <!-- Mẫu hiển thị 1 người bạn -->
         <!--
         <li>
@@ -77,10 +77,10 @@
           <span class="ref-coins">+0 💰</span>
         </li>
         -->
-      </ul>
+        </ul>
+      </div>
     </div>
-  </div>
-</section>
+    </section>
 
 
 
