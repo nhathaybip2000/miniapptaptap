@@ -72,9 +72,10 @@ if (user) {
       lastTapAt = data.last_tap_at;
       updateUI();
 
-      if (!data.modal !== 'no') {
+      if (data.modal === 'no') {
         showReferralModal();
-      }      
+      }
+           
     })
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
