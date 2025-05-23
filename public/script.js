@@ -101,12 +101,18 @@ if (user) {
       maxEnergy = energyLevels[energyLevel];
       lastTapAt = data.last_tap_at;
       updateUI();
-
+    
       const inviteLink = `https://t.me/coinxutaptap_bot/miniApp?start=ref_${user.id}`;
       document.getElementById('invite-link').value = inviteLink;
-
+    
       loadReferrals(user.id);
+    
+      // 👉 Nếu user chưa có ref_by và chưa từng bỏ qua → hiện modal
+      if (!data.ref_by && !localStorage.getItem('referral_done')) {
+        showReferralModal();
+      }
     })
+    
     .catch(err => console.error('Lỗi khi lấy user:', err));
 
   setInterval(updateUI, 5000);
