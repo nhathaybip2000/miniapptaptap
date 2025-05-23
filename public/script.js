@@ -55,7 +55,8 @@ function loadReferrals(userId) {
   })
     .then(res => res.json())
     .then(data => {
-      document.getElementById('ref-bonus').textContent = data.total_bonus || 0;
+      // Thưởng mời = ref_bonus của user hiện tại
+      document.getElementById('ref-bonus').textContent = data.ref_bonus || 0;
       document.getElementById('ref-count').textContent = data.list.length || 0;
 
       const listEl = document.getElementById('referrals');
@@ -70,13 +71,14 @@ function loadReferrals(userId) {
         const li = document.createElement('li');
         li.innerHTML = `
           <span class="ref-name">${friend.first_name || 'Người dùng'}</span>
-          <span class="ref-coins">+${friend.ref_bonus || 0} 💰</span>
+          <span class="ref-coins">${friend.coin || 0} 💰</span>
         `;
         listEl.appendChild(li);
       });
     })
     .catch(err => console.error('Lỗi khi tải danh sách mời:', err));
 }
+
 
 
 // ====== Khởi tạo =======

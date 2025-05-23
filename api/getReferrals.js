@@ -16,21 +16,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Lấy danh sách người được giới thiệu
-    const { data: referrals, error } = await supabase
+    // Lấy danh sách bạn bè được mời (bao gồm coin)
+    const { data: referrals, error: refError } = await supabase
       .from('users')
-      .select('id, first_name, ref_bonus')
+      .select('id, first_name, coin')
       .eq('ref_by', id);
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+    if (refError) {
+      return res.status(500).json({ error: refError.message });
     }
 
-    const totalBonus = referrals.reduce((sum, r) => sum + (r.ref_bonus || 0), 0);
+    // Lấy ref_bonus của người dùng chính
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('ref_bonus')
+      .eq('id', id)
+      .single();
+
+    if (userError || !user) {
+      return res.status(500).json({ error: 'Không thể lấy thông tin người dùng' });
+    }
 
     return res.status(200).json({
       list: referrals,
-      total_bonus: totalBonus
+      ref_bonus: user.ref_bonus || 0
     });
   } catch (err) {
     return res.status(500).json({ error: 'Lỗi máy chủ' });
