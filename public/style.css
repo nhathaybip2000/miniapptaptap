@@ -1062,58 +1062,6 @@ CSS CHO TAB TÀI KHOẢN */
       border-left: none;
     }
 
-    /* 📞 Hỗ trợ */
-    .support-box {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 15px;
-      padding: 20px;
-      margin-top: 20px;
-      border: 1px solid rgba(255,255,255,0.2);
-      text-align: center;
-    }
-
-    .support-box h3 {
-      color: #fff;
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .support-box h3::before {
-      content: "📞";
-      font-size: 24px;
-    }
-
-    .support-box p {
-      color: rgba(255,255,255,0.8);
-      font-size: 14px;
-      margin-bottom: 15px;
-      line-height: 1.5;
-    }
-
-    .support-box a {
-      display: inline-block;
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      color: #fff;
-      text-decoration: none;
-      padding: 12px 20px;
-      border-radius: 25px;
-      font-weight: 600;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .support-box a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-
     /* 📱 Responsive */
     @media (max-width: 480px) {
       #tab-taikhoan {
