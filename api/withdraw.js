@@ -1,22 +1,67 @@
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+// /api/withdraw.js
 
-module.exports = async (req, res) => {
-  const { user_id, amount } = req.body;
+import { createClient } from '@supabase/supabase-js';
 
-  const { data, error } = await supabase
-    .from('users')
-    .select('coin')
-    .eq('user_id', user_id)
-    .single();
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
-  if (error) return res.status(500).json({ error: error.message });
-  if (data.coin < amount) return res.status(400).json({ error: 'Không đủ xu' });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
 
-  await supabase
-    .from('users')
-    .update({ coin: data.coin - amount })
-    .eq('user_id', user_id);
+  const { id, account, name, bank, amount } = req.body;
 
-  res.status(200).json({ message: 'Đã rút thành công' });
-};
+  if (!id || !account || !name || !bank || !amount || amount < 1000) {
+    return res.status(400).json({ error: 'Dữ liệu không hợp lệ' });
+  }
+
+  try {
+    // Lấy số dư hiện tại
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('coin')
+      .eq('id', id)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+    }
+
+    if (user.coin < amount) {
+      return res.status(400).json({ error: 'Không đủ xu để rút' });
+    }
+
+    // Trừ xu trong bảng users
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ coin: user.coin - amount })
+      .eq('id', id);
+
+    if (updateError) {
+      return res.status(500).json({ error: 'Lỗi khi trừ xu' });
+    }
+
+    // Thêm vào bảng withdraws
+    const { error: insertError } = await supabase
+      .from('withdraws')
+      .insert([
+        {
+          user_id: id,
+          account,
+          name,
+          bank,
+          amount,
+          status: 'pending', // mặc định chờ xử lý
+        },
+      ]);
+
+    if (insertError) {
+      return res.status(500).json({ error: 'Không thể tạo yêu cầu rút tiền' });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ error: 'Lỗi máy chủ' });
+  }
+}

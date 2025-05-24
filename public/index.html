@@ -98,11 +98,95 @@
 
 
 
+    
     <!-- Tab: Tài Khoản -->
-    <section id="tab-taikhoan" class="tab">
-      <h2>Tài Khoản</h2>
-      <p>📋 Thông tin của bạn sẽ hiển thị ở đây.</p>
+    <section id="tab-taikhoan" class="tab active">
+      <h2>Tài Khoản của Bạn</h2>
+
+      <!-- 🔢 Số dư -->
+      <div class="balance-box">
+        <p>Số dư hiện tại:</p>
+        <h3>
+          <img src="assets/coin.png" class="coin-icon" />
+          <span id="account-coin">12,500</span>
+        </h3>
+      </div>
+
+      <!-- 🎯 Sub Navigation -->
+      <div class="account-nav">
+        <button class="account-tab-btn active" data-target="withdraw-content">
+           Rút Tiền
+        </button>
+        <button class="account-tab-btn" data-target="history-content">
+           Lịch Sử
+        </button>
+      </div>
+
+      <!--  Nội dung Rút Tiền -->
+      <div id="withdraw-content" class="account-content active">
+        <div class="withdraw-container">
+          <h3>Rút Tiền</h3>
+          <form id="withdraw-form">
+            <input type="text" id="bank-account" placeholder="Số tài khoản" required />
+            <input type="text" id="receiver-name" placeholder="Tên người nhận" required />
+            <input type="text" id="bank-name" placeholder="Tên ngân hàng (VD: Vietcombank)" required />
+            <input type="number" id="withdraw-amount" placeholder="Số xu muốn rút (tối thiểu 1000)" min="1000" required />
+            <button type="submit">Gửi Yêu Cầu Rút</button>
+          </form>
+          <p id="withdraw-message"></p>
+        </div>
+      </div>
+
+      <!--  Nội dung Lịch Sử -->
+      <div id="history-content" class="account-content">
+        <div class="history-container">
+          <h3>Lịch Sử Rút Tiền</h3>
+          <ul id="withdraw-history">
+            <li class="success">
+              <div class="withdraw-info">
+                <span class="withdraw-amount">-5,000 💰</span>
+                <span class="withdraw-status success">Thành công</span>
+              </div>
+              <div class="withdraw-details">
+                Vietcombank - 1234567890<br>
+                Nguyễn Văn A
+              </div>
+              <div class="withdraw-date">22/12/2024 - 14:30</div>
+            </li>
+            <li class="pending">
+              <div class="withdraw-info">
+                <span class="withdraw-amount">-3,000 💰</span>
+                <span class="withdraw-status pending">Đang xử lý</span>
+              </div>
+              <div class="withdraw-details">
+                BIDV - 9876543210<br>
+                Trần Thị B
+              </div>
+              <div class="withdraw-date">23/12/2024 - 09:15</div>
+            </li>
+            <li class="failed">
+              <div class="withdraw-info">
+                <span class="withdraw-amount">-2,000 💰</span>
+                <span class="withdraw-status failed">Thất bại</span>
+              </div>
+              <div class="withdraw-details">
+                Techcombank - 5555666677<br>
+                Lê Văn C
+              </div>
+              <div class="withdraw-date">20/12/2024 - 16:45</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 📞 Hỗ trợ -->
+      <div class="support-box">
+        <h3>Hỗ Trợ</h3>
+        <p>Nếu gặp sự cố, vui lòng liên hệ:</p>
+        <a href="https://t.me/Hoangtranmmo" target="_blank">📩 @your_support_bot</a>
+      </div>
     </section>
+
   </div>
 
   <!-- Menu -->

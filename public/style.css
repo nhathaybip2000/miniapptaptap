@@ -739,3 +739,428 @@ body {
     background: rgba(15, 15, 35, 0.98);
   }
 }
+
+/* 
+CSS CHO TAB TÀI KHOẢN */
+
+    #tab-taikhoan {
+      padding: 20px;
+      padding-bottom: 100px;
+    }
+
+    #tab-taikhoan h2 {
+      text-align: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* 🔢 Số dư */
+    .balance-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .balance-box p {
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .balance-box h3 {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .balance-box .coin-icon {
+      width: 30px;
+      height: 30px;
+      animation: coinSpin 3s linear infinite;
+    }
+
+    @keyframes coinSpin {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+
+    /* 🎯 Sub Navigation Tabs */
+    .account-nav {
+      display: flex;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 5px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .account-nav button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.7);
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Fredoka', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .account-nav button.active {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .account-nav button:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* 📦 Content Containers */
+    .account-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .account-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 💸 Rút Tiền */
+    .withdraw-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .withdraw-container h3 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .withdraw-container h3::before {
+      content: "💸";
+      font-size: 24px;
+    }
+
+    #withdraw-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #withdraw-form input {
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: #fff;
+      font-size: 16px;
+      font-family: 'Fredoka', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    #withdraw-form input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    #withdraw-form input:focus {
+      outline: none;
+      border-color: #4ecdc4;
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+    }
+
+    #withdraw-form button {
+      background: linear-gradient(45deg, #4ecdc4, #44a08d);
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Fredoka', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+
+    #withdraw-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+    }
+
+    #withdraw-form button:active {
+      transform: translateY(0);
+    }
+
+    #withdraw-message {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+
+    #withdraw-message.success {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+      display: block;
+    }
+
+    #withdraw-message.error {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+      border: 1px solid rgba(244, 67, 54, 0.3);
+      display: block;
+    }
+
+    /* 🧾 Lịch sử rút */
+    .history-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      max-height: 400px; /* Giới hạn chiều cao */
+      overflow-y: auto; /* Cho phép scroll dọc */
+    }
+
+    .history-container h3 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-container h3::before {
+      content: "🧾";
+      font-size: 24px;
+    }
+
+    #withdraw-history {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #withdraw-history li {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    #withdraw-history li:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateX(5px);
+    }
+
+    #withdraw-history li.pending {
+      border-left-color: #ffc107;
+    }
+
+    #withdraw-history li.success {
+      border-left-color: #4caf50;
+    }
+
+    #withdraw-history li.failed {
+      border-left-color: #f44336;
+    }
+
+    #withdraw-history li .withdraw-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    #withdraw-history li .withdraw-amount {
+      color: #fff;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    #withdraw-history li .withdraw-status {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    #withdraw-history li .withdraw-status.pending {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+
+    #withdraw-history li .withdraw-status.success {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+    }
+
+    #withdraw-history li .withdraw-status.failed {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+
+    #withdraw-history li .withdraw-details {
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    #withdraw-history li .withdraw-date {
+      color: rgba(255,255,255,0.5);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    #withdraw-history li.empty {
+      text-align: center;
+      color: rgba(255,255,255,0.6);
+      font-style: italic;
+      background: rgba(255, 255, 255, 0.05);
+      border-left: none;
+    }
+
+    /* 📞 Hỗ trợ */
+    .support-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+      text-align: center;
+    }
+
+    .support-box h3 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .support-box h3::before {
+      content: "📞";
+      font-size: 24px;
+    }
+
+    .support-box p {
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .support-box a {
+      display: inline-block;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .support-box a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    /* 📱 Responsive */
+    @media (max-width: 480px) {
+      #tab-taikhoan {
+        padding: 15px;
+        padding-bottom: 100px;
+      }
+      
+      #tab-taikhoan h2 {
+        font-size: 20px;
+      }
+      
+      .balance-box h3 {
+        font-size: 24px;
+      }
+      
+      .balance-box .coin-icon {
+        width: 24px;
+        height: 24px;
+      }
+      
+      .account-nav button {
+        padding: 10px 12px;
+        font-size: 12px;
+      }
+      
+      .withdraw-container, .history-container {
+        padding: 15px;
+      }
+      
+      #withdraw-form input {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+      
+      #withdraw-form button {
+        padding: 12px;
+        font-size: 14px;
+      }
+      
+      #withdraw-history li {
+        padding: 12px;
+      }
+      
+      #withdraw-history li .withdraw-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+    }
+  
