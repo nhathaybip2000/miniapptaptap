@@ -370,6 +370,7 @@ withdrawForm.addEventListener('submit', (e) => {
       amount
     })
   })
+  
     .then(res => res.json())
     .then(data => {
       if (data.success) {
