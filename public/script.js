@@ -417,12 +417,14 @@ function loadWithdrawHistory() {
 
       data.forEach(tx => {
         const li = document.createElement('li');
-        li.classList.add(tx.status); // 'success', 'pending', 'failed'
+        li.classList.add(tx.status); // success, pending, failed
 
         li.innerHTML = `
           <div class="withdraw-info">
             <span class="withdraw-amount">-${tx.amount.toLocaleString()} 💰</span>
-            <span class="withdraw-status ${tx.status}">${tx.status === 'success' ? 'Thành công' : tx.status === 'pending' ? 'Đang xử lý' : 'Thất bại'}</span>
+            <span class="withdraw-status ${tx.status}">
+              ${tx.status === 'success' ? 'Thành công' : tx.status === 'pending' ? 'Đang xử lý' : 'Thất bại'}
+            </span>
           </div>
           <div class="withdraw-details">
             ${tx.bank_name} - ${tx.bank_account}<br>
@@ -439,14 +441,17 @@ function loadWithdrawHistory() {
     });
 }
 
+
 // 👉 Hàm định dạng ngày giờ
 function formatDate(dateStr) {
   const date = new Date(dateStr);
-  return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} - ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} - ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
+
 
 // 👉 Khi trang tải xong
 document.addEventListener('DOMContentLoaded', () => {
   updateAccountBalance();
-  loadWithdrawHistory();
+  loadWithdrawHistory(); // ✅ Gọi hàm này ở cuối file
 });
+

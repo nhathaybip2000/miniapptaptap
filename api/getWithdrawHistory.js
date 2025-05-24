@@ -1,5 +1,3 @@
-// /api/getWithdrawHistory.js
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -8,7 +6,9 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end();
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Chỉ chấp nhận POST' });
+  }
 
   const { id } = req.body;
 
@@ -19,15 +19,15 @@ export default async function handler(req, res) {
   try {
     const { data, error } = await supabase
       .from('withdraws')
-      .select('account, name, bank, amount, status, created_at')
+      .select('*')
       .eq('user_id', id)
       .order('created_at', { ascending: false });
 
     if (error) {
-      return res.status(500).json({ error: 'Lỗi khi lấy dữ liệu' });
+      return res.status(500).json({ error: 'Lỗi truy vấn Supabase' });
     }
 
-    return res.status(200).json({ list: data });
+    return res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ error: 'Lỗi máy chủ' });
   }
