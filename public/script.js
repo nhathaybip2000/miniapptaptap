@@ -341,8 +341,11 @@ function updateAccountBalance() {
 
 
 // 👇 Gửi yêu cầu rút tiền
-withdrawForm.addEventListener('submit', (e) => {
+let isWithdrawing = false;
+
+withdrawForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (isWithdrawing) return;
 
   const bankAccount = document.getElementById('bank-account').value.trim();
   const receiverName = document.getElementById('receiver-name').value.trim();
@@ -350,43 +353,49 @@ withdrawForm.addEventListener('submit', (e) => {
   const amount = parseInt(document.getElementById('withdraw-amount').value.trim());
 
   if (!bankAccount || !receiverName || !bankName || isNaN(amount) || amount < 1000) {
-    withdrawMessage.textContent = 'Vui lòng điền đầy đủ và đúng thông tin.';
+    withdrawMessage.textContent = '⚠️ Vui lòng điền đầy đủ và đúng thông tin.';
     return;
   }
 
   if (coin < amount) {
-    withdrawMessage.textContent = 'Không đủ xu để rút.';
+    withdrawMessage.textContent = '⚠️ Bạn không đủ xu để rút.';
     return;
   }
 
-  fetch('/api/withdraw', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      user_id: user.id,
-      bank_account: bankAccount,
-      receiver_name: receiverName,
-      bank_name: bankName,
-      amount
-    })
-  })
+  isWithdrawing = true;
+  withdrawMessage.textContent = '⏳ Đang gửi yêu cầu...';
   
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        withdrawMessage.textContent = '✅ Yêu cầu rút đã được gửi!';
-        coin -= amount;
-        updateAccountBalance();
-        withdrawForm.reset();
-        loadWithdrawHistory();
-      } else {
-        withdrawMessage.textContent = data.error || 'Lỗi khi gửi yêu cầu.';
-      }
-    })
-    .catch(() => {
-      withdrawMessage.textContent = 'Đã xảy ra lỗi khi gửi yêu cầu.';
+  try {
+    const res = await fetch('/api/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.id,
+        bank_account: bankAccount,
+        receiver_name: receiverName,
+        bank_name: bankName,
+        amount
+      })
     });
+
+    const data = await res.json();
+
+    if (data.success) {
+      withdrawMessage.textContent = '✅ Yêu cầu rút đã được gửi!';
+      coin -= amount;
+      updateAccountBalance();
+      withdrawForm.reset();
+      loadWithdrawHistory();
+    } else {
+      withdrawMessage.textContent = data.error || '❌ Lỗi khi gửi yêu cầu.';
+    }
+  } catch (err) {
+    withdrawMessage.textContent = '❌ Lỗi kết nối máy chủ.';
+  }
+
+  isWithdrawing = false;
 });
+
 
 // 👇 Tải lịch sử rút tiền
 function loadWithdrawHistory() {
