@@ -99,6 +99,7 @@ if (user) {
     .then(res => res.json())
     .then(data => {
       coin = data.coin;
+      document.getElementById('account-coin').textContent = coin.toLocaleString();
       tapLevel = data.tap_level || 1;
       energyLevel = data.energy_level || 1;
       maxEnergy = energyLevels[energyLevel];
@@ -335,8 +336,9 @@ const withdrawHistoryEl = document.getElementById('withdraw-history');
 
 // 👇 Tải số dư người dùng
 function updateAccountBalance() {
-  accountCoinEl.textContent = coin.toLocaleString();
+  document.getElementById('account-coin').textContent = coin.toLocaleString();
 }
+
 
 // 👇 Gửi yêu cầu rút tiền
 withdrawForm.addEventListener('submit', (e) => {
