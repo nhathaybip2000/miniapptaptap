@@ -1,644 +1,893 @@
-// ===== SUPABASE CONFIGURATION =====
+// Khởi tạo Supabase client
+const supabaseUrl = 'https://mujmuntmnplkwmsjbfig.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11am11bnRtbnBsa3dtc2piZmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDk4NTUsImV4cCI6MjA2MzI4NTg1NX0.ve7SYqOoyavg1hVvAGsnoO3O6eKqv66hbQ1pu1qcUpI';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-const SUPABASE_URL = 'https://mujmuntmnplkwmsjbfig.supabase.co'; // VD: https://your-project.supabase.co
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11am11bnRtbnBsa3dtc2piZmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc3MDk4NTUsImV4cCI6MjA2MzI4NTg1NX0.ve7SYqOoyavg1hVvAGsnoO3O6eKqv66hbQ1pu1qcUpI';
-
-
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ===== GLOBAL VARIABLES =====
+// Biến toàn cục
 let currentUser = null;
-let gameData = {
+let userData = {
   coins: 0,
-  energy: 500,
-  maxEnergy: 500,
+  tapPower: 1,
   tapLevel: 1,
-  energyLevel: 1,
-  referralBonus: 0,
-  referralCount: 0,
-  referrals: []
+  energy: 100,
+  energyMax: 200,
+  level: 1,
+  experience: 0,
+  referralCode: '',
+  invitedFriends: 0,
+  referralBonus: 0
 };
+let energyTimer = null;
+let autoTapInterval = null;
 
-// ===== UTILITY FUNCTIONS =====
-function showMessage(message, type = 'success') {
-  const messageElement = document.getElementById(type === 'success' ? 'success-message' : 'error-message');
-  const otherMessageElement = document.getElementById(type === 'success' ? 'error-message' : 'success-message');
+// DOM Elements
+const authSection = document.getElementById('auth-section');
+const mainApp = document.getElementById('main-app');
+const loginForm = document.getElementById('login-form-data');
+const registerForm = document.getElementById('register-form-data');
+const logoutBtn = document.getElementById('logout-btn');
+const notificationBell = document.getElementById('notification-bell');
+const petContainer = document.getElementById('pet-container');
+const tapFeedback = document.getElementById('tap-feedback');
+const coinCount = document.getElementById('coin-count');
+const tapPower = document.getElementById('tap-power');
+const energyFill = document.getElementById('energy-fill');
+const energyText = document.getElementById('energy-text');
+const energyTimerElement = document.getElementById('energy-timer');
+const upgradeTapBtn = document.getElementById('upgrade-tap');
+const upgradeEnergyBtn = document.getElementById('upgrade-energy');
+const quickWithdrawBtn = document.getElementById('quick-withdraw');
+const withdrawForm = document.getElementById('withdraw-form');
+const referralCodeInput = document.getElementById('referral-code');
+const copyReferralBtn = document.getElementById('copy-referral');
+const withdrawModal = document.getElementById('withdraw-modal');
+const closeWithdrawModal = document.getElementById('close-withdraw-modal');
+const toast = document.getElementById('toast');
+
+// Hàm khởi tạo
+document.addEventListener('DOMContentLoaded', () => {
+  initEventListeners();
+  checkSession();
+});
+
+// Khởi tạo event listeners
+function initEventListeners() {
+  // Auth forms
+  loginForm.addEventListener('submit', handleLogin);
+  registerForm.addEventListener('submit', handleRegister);
+  logoutBtn.addEventListener('submit', handleLogout);
   
-  otherMessageElement.style.display = 'none';
-  messageElement.textContent = message;
-  messageElement.style.display = 'block';
+  // Tab switching
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', switchAuthTab);
+  });
   
-  setTimeout(() => {
-    messageElement.style.display = 'none';
-  }, 5000);
+  document.querySelectorAll('.content-tab, .nav-item').forEach(tab => {
+    tab.addEventListener('click', switchContentTab);
+  });
+  
+  // Mining game
+  petContainer.addEventListener('click', handleTap);
+  upgradeTapBtn.addEventListener('click', () => upgradeStat('tap'));
+  upgradeEnergyBtn.addEventListener('click', () => upgradeStat('energy'));
+  
+  // Referral
+  copyReferralBtn.addEventListener('click', copyReferralCode);
+  
+  // Withdraw
+  quickWithdrawBtn.addEventListener('click', () => {
+    document.querySelector('.account-tab[data-tab="withdraw"]').click();
+  });
+  
+  withdrawForm.addEventListener('submit', handleWithdraw);
+  
+  // Modal
+  closeWithdrawModal.addEventListener('click', () => {
+    withdrawModal.classList.remove('active');
+  });
+  
+  // Password toggle
+  document.querySelectorAll('.password-toggle').forEach(toggle => {
+    toggle.addEventListener('click', togglePasswordVisibility);
+  });
+  
+  // Calculate withdraw value
+  document.getElementById('withdraw-amount').addEventListener('input', calculateWithdrawValue);
 }
 
-function generateReferralCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
-// ===== AUTH FUNCTIONS =====
-function switchTab(tab) {
-  // Reset messages
-  document.getElementById('success-message').style.display = 'none';
-  document.getElementById('error-message').style.display = 'none';
+// Kiểm tra session khi tải trang
+async function checkSession() {
+  const { data: { session }, error } = await supabase.auth.getSession();
   
-  // Switch tab buttons
-  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
-  
-  // Switch forms
-  document.querySelectorAll('.form-section').forEach(form => form.classList.remove('active'));
-  document.getElementById(`${tab}-form`).classList.add('active');
-}
-
-function togglePassword(inputId, icon) {
-  const input = document.getElementById(inputId);
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.classList.remove('fa-eye');
-    icon.classList.add('fa-eye-slash');
+  if (session) {
+    currentUser = session.user;
+    await loadUserData();
+    showMainApp();
   } else {
-    input.type = 'password';
-    icon.classList.remove('fa-eye-slash');
-    icon.classList.add('fa-eye');
+    showAuthSection();
   }
 }
 
-async function handleRegister(event) {
-  event.preventDefault();
+// Xử lý đăng nhập
+async function handleLogin(e) {
+  e.preventDefault();
   
-  const username = document.getElementById('register-username').value.trim();
-  const email = document.getElementById('register-email').value.trim();
-  const password = document.getElementById('register-password').value;
-  const confirmPassword = document.getElementById('register-confirm').value;
-  const referralCode = document.getElementById('register-referral').value.trim();
-  
-  // Validation
-  if (password !== confirmPassword) {
-    showMessage('Mật khẩu xác nhận không khớp!', 'error');
-    return;
-  }
-  
-  if (password.length < 6) {
-    showMessage('Mật khẩu phải có ít nhất 6 ký tự!', 'error');
-    return;
-  }
-  
-  try {
-    // Check if username exists
-    const { data: existingUser } = await supabaseClient
-      .from('users')
-      .select('username')
-      .eq('username', username)
-      .single();
-    
-    if (existingUser) {
-      showMessage('Tên đăng nhập đã tồn tại!', 'error');
-      return;
-    }
-    
-    // Create user account
-    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-      email: email,
-      password: password
-    });
-    
-    if (authError) {
-      throw authError;
-    }
-    
-    // Generate referral code for new user
-    const userReferralCode = generateReferralCode();
-    
-    // Create user profile
-    const userData = {
-      id: authData.user.id,
-      username: username,
-      email: email,
-      coins: 1000, // Starting coins
-      energy: 500,
-      max_energy: 500,
-      tap_level: 1,
-      energy_level: 1,
-      referral_code: userReferralCode,
-      referral_bonus: 0,
-      referral_count: 0,
-      referred_by: referralCode || null,
-      created_at: new Date().toISOString()
-    };
-    
-    const { error: insertError } = await supabaseClient
-      .from('users')
-      .insert([userData]);
-    
-    if (insertError) {
-      throw insertError;
-    }
-    
-    // If user was referred, update referrer's data
-    if (referralCode) {
-      await handleReferralBonus(referralCode, username);
-    }
-    
-    showMessage('Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.', 'success');
-    
-    // Clear form
-    document.getElementById('register-form').querySelector('form').reset();
-    
-  } catch (error) {
-    console.error('Registration error:', error);
-    showMessage(error.message || 'Có lỗi xảy ra khi đăng ký!', 'error');
-  }
-}
-
-async function handleLogin(event) {
-  event.preventDefault();
-  
-  const emailOrUsername = document.getElementById('login-email').value.trim();
+  const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
   
-  try {
-    let email = emailOrUsername;
-    
-    // If input is not email format, get email from username
-    if (!emailOrUsername.includes('@')) {
-      const { data: userData } = await supabaseClient
-        .from('users')
-        .select('email')
-        .eq('username', emailOrUsername)
-        .single();
-      
-      if (!userData) {
-        showMessage('Tên đăng nhập không tồn tại!', 'error');
-        return;
-      }
-      
-      email = userData.email;
-    }
-    
-    // Sign in with Supabase Auth
-    const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
-    
-    if (authError) {
-      throw authError;
-    }
-    
-    // Get user data
-    const { data: userData, error: userError } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('id', authData.user.id)
-      .single();
-    
-    if (userError) {
-      throw userError;
-    }
-    
-    // Set current user and game data
-    currentUser = userData;
-    gameData = {
-      coins: userData.coins || 0,
-      energy: userData.energy || 500,
-      maxEnergy: userData.max_energy || 500,
-      tapLevel: userData.tap_level || 1,
-      energyLevel: userData.energy_level || 1,
-      referralBonus: userData.referral_bonus || 0,
-      referralCount: userData.referral_count || 0,
-      referrals: []
+  showLoading(loginForm);
+  
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+  
+  hideLoading(loginForm);
+  
+  if (error) {
+    showNotification('error', error.message);
+    return;
+  }
+  
+  currentUser = data.user;
+  await loadUserData();
+  showMainApp();
+  showNotification('success', 'Đăng nhập thành công!');
+}
+
+// Xử lý đăng ký
+async function handleRegister(e) {
+  e.preventDefault();
+  
+  const username = document.getElementById('register-username').value;
+  const email = document.getElementById('register-email').value;
+  const password = document.getElementById('register-password').value;
+  const confirmPassword = document.getElementById('register-confirm').value;
+  const referralCode = document.getElementById('register-referral').value;
+  
+  if (password !== confirmPassword) {
+    showNotification('error', 'Mật khẩu không khớp!');
+    return;
+  }
+  
+  showLoading(registerForm);
+  
+  // Đăng ký user với Supabase Auth
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password
+  });
+  
+  if (authError) {
+    hideLoading(registerForm);
+    showNotification('error', authError.message);
+    return;
+  }
+  
+  // Tạo user profile trong database
+  const referralCodeGenerated = generateReferralCode();
+  
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .insert([{
+      id: authData.user.id,
+      username,
+      referral_code: referralCodeGenerated,
+      referred_by: referralCode || null
+    }])
+    .select();
+  
+  hideLoading(registerForm);
+  
+  if (profileError) {
+    showNotification('error', profileError.message);
+    return;
+  }
+  
+  // Nếu có mã giới thiệu, cập nhật thông tin người giới thiệu
+  if (referralCode) {
+    await handleReferral(referralCode, authData.user.id);
+  }
+  
+  showNotification('success', 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực.');
+  document.querySelector('.tab-button[data-tab="login"]').click();
+  registerForm.reset();
+}
+
+// Xử lý đăng xuất
+async function handleLogout() {
+  const { error } = await supabase.auth.signOut();
+  
+  if (error) {
+    showNotification('error', error.message);
+    return;
+  }
+  
+  currentUser = null;
+  userData = {
+    coins: 0,
+    tapPower: 1,
+    tapLevel: 1,
+    energy: 100,
+    energyMax: 200,
+    level: 1,
+    experience: 0,
+    referralCode: '',
+    invitedFriends: 0,
+    referralBonus: 0
+  };
+  
+  clearInterval(energyTimer);
+  clearInterval(autoTapInterval);
+  
+  showAuthSection();
+  showNotification('success', 'Đăng xuất thành công!');
+}
+
+// Tải dữ liệu người dùng
+async function loadUserData() {
+  // Lấy thông tin profile
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
+  
+  if (profileError) {
+    showNotification('error', profileError.message);
+    return;
+  }
+  
+  // Lấy thông tin game data
+  const { data: gameData, error: gameError } = await supabase
+    .from('user_game_data')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .single();
+  
+  if (gameError && !gameError.message.includes('No rows found')) {
+    showNotification('error', gameError.message);
+    return;
+  }
+  
+  // Cập nhật userData
+  if (gameData) {
+    userData = {
+      coins: gameData.coins || 0,
+      tapPower: gameData.tap_power || 1,
+      tapLevel: gameData.tap_level || 1,
+      energy: gameData.energy || 100,
+      energyMax: gameData.energy_max || 200,
+      level: gameData.level || 1,
+      experience: gameData.experience || 0,
+      referralCode: profile.referral_code,
+      invitedFriends: profile.invited_friends || 0,
+      referralBonus: profile.referral_bonus || 0
     };
-    
-    // Load referrals
-    await loadReferrals();
-    
-    // Hide auth form and show main app
-    document.querySelector('.auth-container').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    
-    // Initialize game UI
-    initializeGame();
-    
-    showMessage('Đăng nhập thành công!', 'success');
-    
-  } catch (error) {
-    console.error('Login error:', error);
-    showMessage(error.message || 'Đăng nhập thất bại!', 'error');
+  } else {
+    // Tạo dữ liệu game mới nếu chưa có
+    userData.referralCode = profile.referral_code;
+    await saveUserData();
   }
-}
-
-async function handleReferralBonus(referralCode, newUserName) {
-  try {
-    // Find referrer
-    const { data: referrer } = await supabaseClient
-      .from('users')
-      .select('*')
-      .eq('referral_code', referralCode)
-      .single();
-    
-    if (referrer) {
-      // Add bonus coins and increment referral count
-      const newCoins = (referrer.coins || 0) + 1000; // 1000 coins bonus
-      const newReferralCount = (referrer.referral_count || 0) + 1;
-      const newReferralBonus = (referrer.referral_bonus || 0) + 1000;
-      
-      await supabaseClient
-        .from('users')
-        .update({
-          coins: newCoins,
-          referral_count: newReferralCount,
-          referral_bonus: newReferralBonus
-        })
-        .eq('id', referrer.id);
-      
-      // Add to referrals list
-      const { data: existingReferrals } = await supabaseClient
-        .from('referrals')
-        .select('*')
-        .eq('referrer_id', referrer.id);
-      
-      await supabaseClient
-        .from('referrals')
-        .insert([{
-          referrer_id: referrer.id,
-          referred_username: newUserName,
-          bonus_coins: 1000,
-          created_at: new Date().toISOString()
-        }]);
-    }
-  } catch (error) {
-    console.error('Referral bonus error:', error);
-  }
-}
-
-// ===== GAME FUNCTIONS =====
-function initializeGame() {
+  
+  // Cập nhật UI
   updateUI();
-  setupEventListeners();
   
-  // Set referral link
-  document.getElementById('invite-link').value = `${window.location.origin}?ref=${currentUser.referral_code}`;
+  // Bắt đầu energy timer
+  startEnergyTimer();
   
-  // Start energy regeneration
-  startEnergyRegeneration();
-  
-  // Check for referral code in URL
-  checkReferralFromURL();
+  // Kiểm tra auto tap nếu đủ level
+  if (userData.level >= 5) {
+    startAutoTap();
+  }
 }
 
+// Lưu dữ liệu người dùng
+async function saveUserData() {
+  const { data, error } = await supabase
+    .from('user_game_data')
+    .upsert({
+      user_id: currentUser.id,
+      coins: userData.coins,
+      tap_power: userData.tapPower,
+      tap_level: userData.tapLevel,
+      energy: userData.energy,
+      energy_max: userData.energyMax,
+      level: userData.level,
+      experience: userData.experience,
+      updated_at: new Date().toISOString()
+    })
+    .eq('user_id', currentUser.id);
+  
+  if (error) {
+    console.error('Lỗi khi lưu dữ liệu:', error);
+    return;
+  }
+  
+  updateUI();
+}
+
+// Cập nhật giao diện
 function updateUI() {
-  // Update coin displays
-  document.getElementById('coin-count').textContent = gameData.coins.toLocaleString();
-  document.getElementById('account-coin').textContent = gameData.coins.toLocaleString();
+  // User info
+  document.getElementById('username-display').textContent = currentUser.email;
+  document.getElementById('user-level').textContent = userData.level;
+  document.getElementById('user-avatar img').src = currentUser.user_metadata?.avatar_url || 'assets/default-avatar.png';
   
-  // Update energy
-  document.getElementById('energy-label').textContent = `${gameData.energy} / ${gameData.maxEnergy}`;
-  document.querySelector('.energy-bar .fill').style.width = `${(gameData.energy / gameData.maxEnergy) * 100}%`;
+  // Mining tab
+  document.getElementById('coin-count').textContent = userData.coins.toLocaleString();
+  document.getElementById('tap-power').textContent = userData.tapPower;
+  document.getElementById('tap-level').textContent = userData.tapLevel;
+  document.getElementById('tap-bonus').textContent = userData.tapPower;
+  document.getElementById('tap-cost').textContent = calculateUpgradeCost('tap');
+  document.getElementById('energy-level').textContent = Math.floor(userData.energyMax / 100);
+  document.getElementById('energy-max').textContent = userData.energyMax;
+  document.getElementById('energy-cost').textContent = calculateUpgradeCost('energy');
   
-  // Update upgrade buttons
-  document.getElementById('tap-level').textContent = gameData.tapLevel;
-  document.getElementById('tap-cost').textContent = (gameData.tapLevel * 100).toLocaleString();
-  document.getElementById('energy-max').textContent = gameData.maxEnergy;
-  document.getElementById('energy-cost').textContent = (gameData.energyLevel * 100).toLocaleString();
+  // Energy bar
+  updateEnergyBar();
   
-  // Update referral info
-  document.getElementById('ref-bonus').textContent = gameData.referralBonus.toLocaleString();
-  document.getElementById('ref-count').textContent = gameData.referralCount;
-}
-
-function setupEventListeners() {
-  // Coin tap
-  document.getElementById('big-coin').addEventListener('click', handleCoinTap);
+  // Account tab
+  document.getElementById('account-balance').textContent = userData.coins.toLocaleString() + ' 💰';
+  document.getElementById('account-level').textContent = userData.level;
+  document.getElementById('total-earned').textContent = (userData.coins + 5000).toLocaleString() + ' 💰'; // Giả định
   
-  // Upgrades
-  document.getElementById('upgrade-tap').addEventListener('click', upgradeTap);
-  document.getElementById('upgrade-energy').addEventListener('click', upgradeEnergy);
+  // Referral tab
+  document.getElementById('referral-code').value = userData.referralCode;
+  document.getElementById('ref-count').textContent = userData.invitedFriends;
+  document.getElementById('ref-bonus').textContent = userData.referralBonus;
   
-  // Tab navigation
-  document.querySelectorAll('[data-tab]').forEach(button => {
-    button.addEventListener('click', () => switchGameTab(button.dataset.tab));
-  });
+  // Upgrade buttons
+  document.getElementById('upgrade-tap').querySelector('.price').textContent = `${calculateUpgradeCost('tap')} 💰`;
+  document.getElementById('upgrade-energy').querySelector('.price').textContent = `${calculateUpgradeCost('energy')} 💰`;
   
-  // Account tabs
-  document.querySelectorAll('.account-tab-btn').forEach(button => {
-    button.addEventListener('click', () => switchAccountTab(button.dataset.target));
-  });
-  
-  // Copy referral link
-  document.getElementById('copy-link').addEventListener('click', copyReferralLink);
-  
-  // Withdraw form
-  document.getElementById('withdraw-form').addEventListener('submit', handleWithdraw);
-}
-
-async function handleCoinTap() {
-  if (gameData.energy <= 0) return;
-  
-  gameData.coins += gameData.tapLevel;
-  gameData.energy -= 1;
-  
-  // Add visual effects
-  const coin = document.getElementById('big-coin');
-  coin.style.transform = 'scale(0.95)';
-  setTimeout(() => {
-    coin.style.transform = 'scale(1)';
-  }, 100);
-  
-  // Create floating coin effect
-  createFloatingCoin();
-  
-  updateUI();
-  
-  // Save to database every 10 taps
-  if (gameData.coins % 10 === 0) {
-    await saveGameData();
+  // Auto tap unlock
+  if (userData.level >= 5) {
+    const autoTapCard = document.querySelector('.upgrade-card.disabled');
+    if (autoTapCard) {
+      autoTapCard.classList.remove('disabled');
+      autoTapCard.querySelector('button').textContent = 'Mua Auto Tap';
+      autoTapCard.querySelector('button').addEventListener('click', () => buyAutoTap());
+    }
   }
 }
 
-function createFloatingCoin() {
-  const floatingCoin = document.createElement('div');
-  floatingCoin.textContent = `+${gameData.tapLevel}`;
-  floatingCoin.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #FFD700;
-    font-weight: bold;
-    font-size: 20px;
-    pointer-events: none;
-    z-index: 1000;
-    animation: floatUp 1s ease-out forwards;
-  `;
+// Xử lý tap vào pet
+function handleTap(e) {
+  if (userData.energy <= 0) {
+    showNotification('warning', 'Bạn đã hết năng lượng! Vui lòng chờ hồi phục.');
+    return;
+  }
   
-  document.body.appendChild(floatingCoin);
+  // Giảm energy
+  userData.energy -= 1;
   
+  // Thêm coins
+  const coinsEarned = userData.tapPower;
+  userData.coins += coinsEarned;
+  
+  // Thêm experience
+  userData.experience += 1;
+  
+  // Kiểm tra level up
+  checkLevelUp();
+  
+  // Hiệu ứng tap
+  createTapEffect(e);
+  
+  // Cập nhật UI
+  updateEnergyBar();
+  document.getElementById('coin-count').textContent = userData.coins.toLocaleString();
+  
+  // Lưu dữ liệu (debounce để tránh gọi quá nhiều)
+  debounceSave();
+}
+
+// Tạo hiệu ứng khi tap
+function createTapEffect(e) {
+  const rect = petContainer.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  // Hiệu ứng tap
+  const tapEffect = document.createElement('div');
+  tapEffect.className = 'tap-effect';
+  tapEffect.style.left = `${x}px`;
+  tapEffect.style.top = `${y}px`;
+  petContainer.appendChild(tapEffect);
+  
+  // Hiệu ứng coin
+  const coin = document.createElement('div');
+  coin.className = 'coin-burst';
+  coin.textContent = `+${userData.tapPower}`;
+  coin.style.left = `${x}px`;
+  coin.style.top = `${y}px`;
+  tapFeedback.appendChild(coin);
+  
+  // Xóa sau khi animation kết thúc
   setTimeout(() => {
-    floatingCoin.remove();
+    tapEffect.remove();
+    coin.remove();
   }, 1000);
 }
 
-async function upgradeTap() {
-  const cost = gameData.tapLevel * 100;
-  if (gameData.coins >= cost) {
-    gameData.coins -= cost;
-    gameData.tapLevel += 1;
-    updateUI();
-    await saveGameData();
-  }
-}
-
-async function upgradeEnergy() {
-  const cost = gameData.energyLevel * 100;
-  if (gameData.coins >= cost) {
-    gameData.coins -= cost;
-    gameData.energyLevel += 1;
-    gameData.maxEnergy += 100;
-    gameData.energy = gameData.maxEnergy; // Refill energy
-    updateUI();
-    await saveGameData();
-  }
-}
-
-function startEnergyRegeneration() {
-  setInterval(() => {
-    if (gameData.energy < gameData.maxEnergy) {
-      gameData.energy += 1;
-      updateUI();
+// Nâng cấp chỉ số
+async function upgradeStat(stat) {
+  let cost = 0;
+  
+  if (stat === 'tap') {
+    cost = calculateUpgradeCost('tap');
+    if (userData.coins < cost) {
+      showNotification('error', 'Không đủ xu để nâng cấp!');
+      return;
     }
-  }, 3000); // Regenerate 1 energy every 3 seconds
-}
-
-async function saveGameData() {
-  if (!currentUser) return;
-  
-  try {
-    await supabaseClient
-      .from('users')
-      .update({
-        coins: gameData.coins,
-        energy: gameData.energy,
-        max_energy: gameData.maxEnergy,
-        tap_level: gameData.tapLevel,
-        energy_level: gameData.energyLevel,
-        referral_bonus: gameData.referralBonus,
-        referral_count: gameData.referralCount,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', currentUser.id);
-  } catch (error) {
-    console.error('Save error:', error);
-  }
-}
-
-async function loadReferrals() {
-  if (!currentUser) return;
-  
-  try {
-    const { data: referrals } = await supabaseClient
-      .from('referrals')
-      .select('*')
-      .eq('referrer_id', currentUser.id)
-      .order('created_at', { ascending: false });
     
-    gameData.referrals = referrals || [];
-    updateReferralsList();
-  } catch (error) {
-    console.error('Load referrals error:', error);
+    userData.coins -= cost;
+    userData.tapLevel += 1;
+    userData.tapPower = Math.floor(userData.tapLevel * 1.5);
+  } 
+  else if (stat === 'energy') {
+    cost = calculateUpgradeCost('energy');
+    if (userData.coins < cost) {
+      showNotification('error', 'Không đủ xu để nâng cấp!');
+      return;
+    }
+    
+    userData.coins -= cost;
+    userData.energyMax += 50;
+    userData.energy = userData.energyMax; // Đầy năng lượng khi nâng cấp
   }
+  
+  // Lưu dữ liệu
+  await saveUserData();
+  showNotification('success', `Nâng cấp ${stat === 'tap' ? 'sức mạnh' : 'năng lượng'} thành công!`);
 }
 
-function updateReferralsList() {
-  const referralsList = document.getElementById('referrals');
-  referralsList.innerHTML = '';
+// Tính chi phí nâng cấp
+function calculateUpgradeCost(stat) {
+  if (stat === 'tap') {
+    return Math.floor(100 * Math.pow(1.2, userData.tapLevel - 1));
+  } 
+  else if (stat === 'energy') {
+    return Math.floor(150 * Math.pow(1.15, Math.floor(userData.energyMax / 100) - 1));
+  }
+  return 0;
+}
+
+// Kiểm tra level up
+function checkLevelUp() {
+  const expNeeded = userData.level * 100;
   
-  if (gameData.referrals.length === 0) {
-    referralsList.innerHTML = '<li>Chưa có bạn bè nào được mời</li>';
+  if (userData.experience >= expNeeded) {
+    userData.level += 1;
+    userData.experience = 0;
+    
+    // Hiển thị thông báo level up
+    showLevelUpNotification();
+    
+    // Mở khóa tính năng mới nếu đủ level
+    if (userData.level === 5) {
+      showNotification('info', 'Bạn đã mở khóa Auto Tap!');
+      startAutoTap();
+    }
+  }
+  
+  // Cập nhật thanh progress
+  const progressBar = document.querySelector('.progress-fill');
+  const expNeededNext = userData.level * 100;
+  const progressPercent = (userData.experience / expNeededNext) * 100;
+  progressBar.style.width = `${progressPercent}%`;
+  progressBar.nextElementSibling.textContent = `${Math.floor(progressPercent)}%`;
+}
+
+// Hiển thị thông báo level up
+function showLevelUpNotification() {
+  const notification = document.createElement('div');
+  notification.className = 'notification info';
+  notification.innerHTML = `
+    <i class="fas fa-level-up-alt"></i>
+    <span>Level Up! Bạn đã đạt level ${userData.level}</span>
+  `;
+  
+  document.getElementById('notification-area').appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 5000);
+}
+
+// Bắt đầu auto tap
+function startAutoTap() {
+  if (autoTapInterval) clearInterval(autoTapInterval);
+  
+  autoTapInterval = setInterval(() => {
+    if (userData.energy > 0) {
+      // Tạo sự kiện tap giả
+      const fakeEvent = {
+        clientX: petContainer.offsetLeft + petContainer.offsetWidth / 2,
+        clientY: petContainer.offsetTop + petContainer.offsetHeight / 2
+      };
+      
+      handleTap(fakeEvent);
+    }
+  }, 1000); // Auto tap mỗi giây
+}
+
+// Mua auto tap
+async function buyAutoTap() {
+  const cost = 500;
+  
+  if (userData.coins < cost) {
+    showNotification('error', 'Bạn cần 500 💰 để mua Auto Tap!');
     return;
   }
   
-  gameData.referrals.forEach(referral => {
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span class="ref-name">${referral.referred_username}</span>
-      <span class="ref-coins">+${referral.bonus_coins} 💰</span>
-    `;
-    referralsList.appendChild(li);
-  });
+  userData.coins -= cost;
+  await saveUserData();
+  startAutoTap();
+  
+  showNotification('success', 'Bạn đã mua Auto Tap thành công!');
 }
 
-// ===== UI FUNCTIONS =====
-function switchGameTab(tabName) {
-  // Hide all tabs
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+// Energy timer
+function startEnergyTimer() {
+  if (energyTimer) clearInterval(energyTimer);
   
-  // Show selected tab
-  document.getElementById(`tab-${tabName}`).classList.add('active');
-  
-  // Update menu buttons
-  document.querySelectorAll('[data-tab]').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+  energyTimer = setInterval(() => {
+    if (userData.energy < userData.energyMax) {
+      userData.energy += 1;
+      updateEnergyBar();
+      
+      // Lưu mỗi 10 energy hồi phục để giảm request
+      if (userData.energy % 10 === 0) {
+        debounceSave();
+      }
+    }
+    
+    // Cập nhật timer UI
+    updateEnergyTimer();
+  }, 3000); // Hồi phục 1 energy mỗi 3 giây
 }
 
-function switchAccountTab(targetId) {
-  // Update buttons
-  document.querySelectorAll('.account-tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`[data-target="${targetId}"]`).classList.add('active');
-  
-  // Update content
-  document.querySelectorAll('.account-content').forEach(content => content.classList.remove('active'));
-  document.getElementById(targetId).classList.add('active');
+// Cập nhật thanh energy
+function updateEnergyBar() {
+  const percent = (userData.energy / userData.energyMax) * 100;
+  energyFill.style.width = `${percent}%`;
+  energyText.textContent = `${userData.energy}/${userData.energyMax}`;
 }
 
-function copyReferralLink() {
-  const link = document.getElementById('invite-link');
-  link.select();
-  link.setSelectionRange(0, 99999);
+// Cập nhật energy timer
+function updateEnergyTimer() {
+  if (userData.energy >= userData.energyMax) {
+    energyTimerElement.style.display = 'none';
+    return;
+  }
+  
+  energyTimerElement.style.display = 'flex';
+  const energyMissing = userData.energyMax - userData.energy;
+  const seconds = energyMissing * 3; // Mỗi energy cần 3 giây
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  energyTimerElement.querySelector('span').textContent = 
+    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Xử lý referral
+async function handleReferral(referralCode, newUserId) {
+  // Tìm người giới thiệu
+  const { data: referrer, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('referral_code', referralCode)
+    .single();
+  
+  if (error || !referrer) {
+    console.log('Mã giới thiệu không hợp lệ');
+    return;
+  }
+  
+  // Cập nhật thông tin người giới thiệu
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({
+      invited_friends: (referrer.invited_friends || 0) + 1,
+      referral_bonus: (referrer.referral_bonus || 0) + 100
+    })
+    .eq('id', referrer.id);
+  
+  if (updateError) {
+    console.error('Lỗi khi cập nhật người giới thiệu:', updateError);
+    return;
+  }
+  
+  // Thêm bonus cho người mới nếu cần
+  const { error: bonusError } = await supabase
+    .from('user_game_data')
+    .update({
+      coins: 100
+    })
+    .eq('user_id', newUserId);
+  
+  if (bonusError) {
+    console.error('Lỗi khi thêm bonus:', bonusError);
+  }
+}
+
+// Copy referral code
+function copyReferralCode() {
+  referralCodeInput.select();
   document.execCommand('copy');
   
-  const button = document.getElementById('copy-link');
-  const originalText = button.textContent;
-  button.textContent = 'Đã Copy!';
+  showToast('Đã copy mã giới thiệu!');
+}
+
+// Xử lý rút tiền
+async function handleWithdraw(e) {
+  e.preventDefault();
+  
+  const bankName = document.getElementById('bank-name').value;
+  const bankAccount = document.getElementById('bank-account').value;
+  const accountName = document.getElementById('account-name').value;
+  const amount = parseInt(document.getElementById('withdraw-amount').value);
+  
+  // Validate
+  if (!bankName || !bankAccount || !accountName || !amount) {
+    showNotification('error', 'Vui lòng điền đầy đủ thông tin!');
+    return;
+  }
+  
+  if (amount < 1000) {
+    showNotification('error', 'Số xu tối thiểu để rút là 1,000!');
+    return;
+  }
+  
+  if (userData.coins < amount) {
+    showNotification('error', 'Số dư không đủ để thực hiện giao dịch!');
+    return;
+  }
+  
+  showLoading(withdrawForm);
+  
+  // Tạo yêu cầu rút tiền
+  const { data, error } = await supabase
+    .from('withdrawals')
+    .insert([{
+      user_id: currentUser.id,
+      bank_name: bankName,
+      bank_account: bankAccount,
+      account_name: accountName,
+      amount: amount,
+      status: 'pending'
+    }])
+    .select();
+  
+  hideLoading(withdrawForm);
+  
+  if (error) {
+    showNotification('error', error.message);
+    return;
+  }
+  
+  // Trừ coins
+  userData.coins -= amount;
+  await saveUserData();
+  
+  // Hiển thị modal thành công
+  withdrawModal.classList.add('active');
+  withdrawForm.reset();
+  
+  // Thêm vào lịch sử
+  addWithdrawalToHistory(data[0]);
+}
+
+// Thêm vào lịch sử rút tiền
+function addWithdrawalToHistory(withdrawal) {
+  const historyList = document.getElementById('withdraw-history');
+  const emptyState = document.getElementById('empty-history');
+  
+  if (emptyState) emptyState.style.display = 'none';
+  
+  const withdrawalDate = new Date(withdrawal.created_at);
+  const formattedDate = withdrawalDate.toLocaleDateString('vi-VN') + ' ' + withdrawalDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  
+  const historyItem = document.createElement('div');
+  historyItem.className = `history-item ${withdrawal.status}`;
+  historyItem.innerHTML = `
+    <div class="item-icon">
+      <i class="fas fa-${withdrawal.status === 'success' ? 'check-circle' : withdrawal.status === 'pending' ? 'clock' : 'times-circle'}"></i>
+    </div>
+    <div class="item-details">
+      <h4>-${withdrawal.amount.toLocaleString()} 💰</h4>
+      <p>${withdrawal.bank_name} - ${withdrawal.bank_account.slice(0, 3)}****${withdrawal.bank_account.slice(-3)}</p>
+      <small>${formattedDate}</small>
+    </div>
+    <div class="item-status ${withdrawal.status}">
+      ${withdrawal.status === 'success' ? 'Thành công' : withdrawal.status === 'pending' ? 'Đang xử lý' : 'Thất bại'}
+    </div>
+  `;
+  
+  historyList.insertBefore(historyItem, historyList.firstChild);
+}
+
+// Tính toán giá trị rút tiền
+function calculateWithdrawValue() {
+  const amount = parseInt(document.getElementById('withdraw-amount').value) || 0;
+  const fee = Math.floor(amount * 0.05); // Phí 5%
+  const received = amount - fee;
+  
+  document.getElementById('withdraw-value').textContent = (received * 10).toLocaleString(); // Tỉ lệ 1:10
+}
+
+// Tạo mã giới thiệu
+function generateReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return 'XU' + result;
+}
+
+// Hiển thị auth section
+function showAuthSection() {
+  authSection.style.display = 'flex';
+  mainApp.style.display = 'none';
+}
+
+// Hiển thị main app
+function showMainApp() {
+  authSection.style.display = 'none';
+  mainApp.style.display = 'flex';
+}
+
+// Chuyển tab auth
+function switchAuthTab(e) {
+  const tab = e.target.dataset.tab;
+  
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.classList.remove('active');
+  });
+  
+  document.querySelectorAll('.form-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  e.target.classList.add('active');
+  document.getElementById(`${tab}-form`).classList.add('active');
+}
+
+// Chuyển tab content
+function switchContentTab(e) {
+  const tab = e.currentTarget.dataset.tab;
+  
+  document.querySelectorAll('.content-tab, .nav-item').forEach(button => {
+    button.classList.remove('active');
+  });
+  
+  document.querySelectorAll('.tab-content').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  e.currentTarget.classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  
+  // Account subtabs
+  if (tab === 'taikhoan') {
+    document.querySelector('.account-tab[data-tab="withdraw"]').click();
+  }
+}
+
+// Hiển thị loading
+function showLoading(form) {
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+}
+
+// Ẩn loading
+function hideLoading(form) {
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = false;
+  
+  if (form.id === 'login-form-data') {
+    button.innerHTML = '<i class="fas fa-sign-in-alt"></i> Đăng Nhập';
+  } else if (form.id === 'register-form-data') {
+    button.innerHTML = '<i class="fas fa-user-plus"></i> Đăng Ký Tài Khoản';
+  } else if (form.id === 'withdraw-form') {
+    button.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi yêu cầu rút tiền';
+  }
+}
+
+// Hiển thị thông báo
+function showNotification(type, message) {
+  const notificationArea = document.getElementById('notification-area');
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  
+  let icon = '';
+  switch (type) {
+    case 'success': icon = 'check-circle'; break;
+    case 'error': icon = 'exclamation-circle'; break;
+    case 'warning': icon = 'exclamation-triangle'; break;
+    default: icon = 'info-circle';
+  }
+  
+  notification.innerHTML = `
+    <i class="fas fa-${icon}"></i>
+    <span>${message}</span>
+  `;
+  
+  notificationArea.appendChild(notification);
+  
   setTimeout(() => {
-    button.textContent = originalText;
+    notification.remove();
+  }, 5000);
+}
+
+// Hiển thị toast
+function showToast(message, type = 'info') {
+  toast.textContent = message;
+  toast.className = `toast ${type}`;
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+
+// Toggle password visibility
+function togglePasswordVisibility(e) {
+  const targetId = e.target.dataset.target;
+  const input = document.getElementById(targetId);
+  const icon = e.target;
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  } else {
+    input.type = 'password';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  }
+}
+
+// Debounce save để giảm số lần gọi API
+let saveTimeout = null;
+function debounceSave() {
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    saveUserData();
   }, 2000);
 }
 
-async function handleWithdraw(event) {
-  event.preventDefault();
-  
-  const bankAccount = document.getElementById('bank-account').value;
-  const receiverName = document.getElementById('receiver-name').value;
-  const bankName = document.getElementById('bank-name').value;
-  const amount = parseInt(document.getElementById('withdraw-amount').value);
-  
-  const messageElement = document.getElementById('withdraw-message');
-  
-  if (amount < 1000) {
-    messageElement.textContent = 'Số xu tối thiểu để rút là 1000!';
-    messageElement.style.color = 'red';
-    return;
-  }
-  
-  if (amount > gameData.coins) {
-    messageElement.textContent = 'Số xu không đủ!';
-    messageElement.style.color = 'red';
-    return;
-  }
-  
-  try {
-    // Save withdraw request
-    await supabaseClient
-      .from('withdraw_requests')
-      .insert([{
-        user_id: currentUser.id,
-        username: currentUser.username,
-        amount: amount,
-        bank_account: bankAccount,
-        receiver_name: receiverName,
-        bank_name: bankName,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      }]);
-    
-    // Deduct coins
-    gameData.coins -= amount;
-    await saveGameData();
-    updateUI();
-    
-    messageElement.textContent = 'Yêu cầu rút tiền đã được gửi! Chúng tôi sẽ xử lý trong 24-48 giờ.';
-    messageElement.style.color = 'green';
-    
-    // Clear form
-    document.getElementById('withdraw-form').reset();
-    
-  } catch (error) {
-    console.error('Withdraw error:', error);
-    messageElement.textContent = 'Có lỗi xảy ra! Vui lòng thử lại.';
-    messageElement.style.color = 'red';
-  }
-}
-
-function checkReferralFromURL() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const refCode = urlParams.get('ref');
-  if (refCode) {
-    document.getElementById('register-referral').value = refCode;
-    switchTab('register');
-  }
-}
-
-// ===== ADD REQUIRED CSS FOR ANIMATIONS =====
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes floatUp {
-    0% {
-      opacity: 1;
-      transform: translate(-50%, -50%) translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translate(-50%, -50%) translateY(-100px);
-    }
-  }
-  
-  #big-coin {
-    transition: transform 0.1s ease;
-    cursor: pointer;
-  }
-  
-  .submit-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-document.head.appendChild(style);
-
-// ===== INITIALIZE APP =====
-document.addEventListener('DOMContentLoaded', () => {
-  // Check if user is already logged in
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      // User is logged in, load their data
-      const { data: userData } = await supabaseClient
-        .from('users')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (userData) {
-        currentUser = userData;
-        gameData = {
-          coins: userData.coins || 0,
-          energy: userData.energy || 500,
-          maxEnergy: userData.max_energy || 500,
-          tapLevel: userData.tap_level || 1,
-          energyLevel: userData.energy_level || 1,
-          referralBonus: userData.referral_bonus || 0,
-          referralCount: userData.referral_count || 0,
-          referrals: []
-        };
+// Thêm realtime listener cho thông báo
+function setupRealtimeListener() {
+  const channel = supabase
+    .channel('notifications')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${currentUser.id}`
+      },
+      (payload) => {
+        // Hiển thị thông báo mới
+        showNotification('info', payload.new.message);
         
-        await loadReferrals();
-        
-        document.querySelector('.auth-container').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        
-        initializeGame();
+        // Cập nhật badge
+        const badge = document.querySelector('.notification-btn .badge');
+        if (badge) {
+          badge.textContent = parseInt(badge.textContent || '0') + 1;
+        }
       }
-    }
-  });
-  
-  // Check for referral code in URL
-  checkReferralFromURL();
-});
+    )
+    .subscribe();
+}
 
-// ===== AUTO SAVE GAME DATA =====
-setInterval(async () => {
-  if (currentUser) {
-    await saveGameData();
-  }
-}, 30000); // Auto save every 30 seconds
+// Khởi tạo realtime listener khi đăng nhập
+if (currentUser) {
+  setupRealtimeListener();
+}

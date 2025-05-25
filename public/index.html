@@ -1,292 +1,612 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>COIN XU TAP TAP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <title>COIN XU TAP TAP - Game kiếm xu thú vị</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Ứng dụng kiếm xu bằng cách tap và hoàn thành nhiệm vụ. Rút tiền thật dễ dàng!">
+  <meta name="theme-color" content="#6c5ce7">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
 </head>
 <body>
+  <!-- Authentication Section -->
+  <div id="auth-section" class="auth-section">
+    <div class="auth-container">
+      <div class="logo-section">
+        <div class="logo-animation">
+          <div class="coin-logo">
+            <i class="fas fa-coins"></i>
+          </div>
+          <div class="logo-rays"></div>
+        </div>
+        <h1 class="app-title">COIN XU TAP TAP</h1>
+        <p class="app-subtitle">Kiếm xu - Rút tiền thật dễ dàng</p>
+      </div>
 
-  <div class="floating-shapes">
-    <div class="shape"></div>
-    <div class="shape"></div>
-    <div class="shape"></div>
+      <div class="auth-tabs">
+        <button class="tab-button active" data-tab="login">Đăng Nhập</button>
+        <button class="tab-button" data-tab="register">Đăng Ký</button>
+      </div>
+
+      <!-- Notification Messages -->
+      <div id="notification-area"></div>
+
+      <!-- Login Form -->
+      <div id="login-form" class="form-section active">
+        <form id="login-form-data">
+          <div class="form-group">
+            <label for="login-email">Email/Tên đăng nhập</label>
+            <div class="input-container">
+              <input type="text" id="login-email" class="form-input" placeholder="Nhập email hoặc tên đăng nhập" required>
+              <i class="fas fa-user input-icon"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Mật khẩu</label>
+            <div class="input-container">
+              <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required>
+              <i class="fas fa-eye-slash password-toggle input-icon" data-target="login-password"></i>
+            </div>
+          </div>
+          <button type="submit" class="submit-button login-btn">
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Đăng Nhập</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" class="form-section">
+        <form id="register-form-data">
+          <div class="form-group">
+            <label for="register-username">Tên đăng nhập</label>
+            <div class="input-container">
+              <input type="text" id="register-username" class="form-input" placeholder="Từ 4-16 ký tự" required minlength="4" maxlength="16">
+              <i class="fas fa-user input-icon"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="register-email">Email</label>
+            <div class="input-container">
+              <input type="email" id="register-email" class="form-input" placeholder="Địa chỉ email hợp lệ" required>
+              <i class="fas fa-envelope input-icon"></i>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="register-password">Mật khẩu</label>
+              <div class="input-container">
+                <input type="password" id="register-password" class="form-input" placeholder="Tối thiểu 6 ký tự" required minlength="6">
+                <i class="fas fa-eye-slash password-toggle input-icon" data-target="register-password"></i>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="register-confirm">Xác nhận</label>
+              <div class="input-container">
+                <input type="password" id="register-confirm" class="form-input" placeholder="Nhập lại mật khẩu" required>
+                <i class="fas fa-eye-slash password-toggle input-icon" data-target="register-confirm"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="register-referral">Mã giới thiệu <span class="optional">(tùy chọn)</span></label>
+            <div class="input-container">
+              <input type="text" id="register-referral" class="form-input" placeholder="Nhập mã nếu có">
+              <i class="fas fa-gift input-icon"></i>
+            </div>
+          </div>
+
+          <div class="form-checkbox">
+            <input type="checkbox" id="terms-agree" required>
+            <label for="terms-agree">Tôi đồng ý với <a href="#terms">Điều khoản dịch vụ</a> và <a href="#privacy">Chính sách bảo mật</a></label>
+          </div>
+
+          <button type="submit" class="submit-button register-btn">
+            <i class="fas fa-user-plus"></i>
+            <span>Đăng Ký Tài Khoản</span>
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 
-  <div class="auth-container">
-    <div class="logo-section">
-      <div class="logo">
-        <i class="fas fa-coins"></i>
+  <!-- Main App (hidden until authenticated) -->
+  <div id="main-app" class="main-app">
+    <!-- Header with User Info -->
+    <header class="app-header">
+      <div class="user-profile">
+        <div class="avatar" id="user-avatar">
+          <img src="assets/default-avatar.png" alt="Avatar">
+          <span class="online-status"></span>
+        </div>
+        <div class="user-info">
+          <h3 id="username-display">Tên người dùng</h3>
+          <p class="user-level">Level <span id="user-level">1</span></p>
+        </div>
       </div>
-      <h1 class="app-title">COIN XU TAP TAP</h1>
-      <p class="app-subtitle">Chào mừng bạn đến với thế giới coin</p>
-    </div>
+      <button class="notification-btn" id="notification-bell">
+        <i class="fas fa-bell"></i>
+        <span class="badge">3</span>
+      </button>
+    </header>
 
-    <div class="auth-tabs">
-      <button class="tab-button active" onclick="switchTab('login')">Đăng Nhập</button>
-      <button class="tab-button" onclick="switchTab('register')">Đăng Ký</button>
-    </div>
-
-    <!-- Messages -->
-    <div id="success-message" class="success-message" style="display: none;"></div>
-    <div id="error-message" class="error-message" style="display: none;"></div>
-
-    <!-- Login Form -->
-    <div id="login-form" class="form-section active">
-      <form onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="login-email">Email hoặc Tên đăng nhập</label>
-          <div class="input-container">
-            <input type="text" id="login-email" class="form-input" placeholder="Nhập email hoặc tên đăng nhập" required>
-            <i class="fas fa-user input-icon"></i>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="login-password">Mật khẩu</label>
-          <div class="input-container">
-            <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required>
-            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('login-password', this)"></i>
-          </div>
-        </div>
-
-        <button type="submit" class="submit-button">
-          <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
-          Đăng Nhập
+    <!-- Main Content Area -->
+    <main class="app-content">
+      <!-- Tab Navigation -->
+      <nav class="content-tabs">
+        <button class="content-tab active" data-tab="khaithac">
+          <i class="fas fa-hammer"></i>
+          <span>Khai Thác</span>
         </button>
-      </form>
-    </div>
-
-    <!-- Register Form -->
-    <div id="register-form" class="form-section">
-      <form onsubmit="handleRegister(event)">
-        <div class="form-group">
-          <label for="register-username">Tên đăng nhập</label>
-          <div class="input-container">
-            <input type="text" id="register-username" class="form-input" placeholder="Nhập tên đăng nhập" required>
-            <i class="fas fa-user input-icon"></i>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="register-email">Email</label>
-          <div class="input-container">
-            <input type="email" id="register-email" class="form-input" placeholder="Nhập địa chỉ email" required>
-            <i class="fas fa-envelope input-icon"></i>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="register-password">Mật khẩu</label>
-          <div class="input-container">
-            <input type="password" id="register-password" class="form-input" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" required minlength="6">
-            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('register-password', this)"></i>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="register-confirm">Xác nhận mật khẩu</label>
-          <div class="input-container">
-            <input type="password" id="register-confirm" class="form-input" placeholder="Nhập lại mật khẩu" required>
-            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('register-confirm', this)"></i>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="register-referral">Mã giới thiệu (tùy chọn)</label>
-          <div class="input-container">
-            <input type="text" id="register-referral" class="form-input" placeholder="Nhập mã giới thiệu (nếu có)">
-            <i class="fas fa-gift input-icon"></i>
-          </div>
-        </div>
-
-        <button type="submit" class="submit-button">
-          <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
-          Đăng Ký
+        <button class="content-tab" data-tab="nhiemvu">
+          <i class="fas fa-tasks"></i>
+          <span>Nhiệm Vụ</span>
         </button>
-      </form>
-
-<div id="main-app" style="display: none;">
-  <div class="container">
-    <!-- Tab: Khai Thác -->
-    <section id="tab-khaithac" class="tab active">
-      <section class="balance">
-        <p>Your Balance</p>
-        <h2>
-          <img src="assets/coin.png" class="coin-icon" />
-          <span id="coin-count"></span>
-        </h2>
-      </section>
-
-      <div class="pet">
-        <img src="assets/pet.png" alt="Pet" id="big-coin" />
-      </div>
-
-      <div class="energy-bar">
-        <span>⚡</span>
-        <div class="bar">
-          <div class="fill"></div>
-        </div>
-        <span class="label" id="energy-label">0 / 500</span>
-      </div>
-
-      <!-- 👇 Nâng Cấp 👇 -->
-      <div class="upgrade-section">
-        <button id="upgrade-tap">
-          🔼 Nâng Cấp Tap (+<span id="tap-level">1</span>) – <span id="tap-cost">100</span>💰
+        <button class="content-tab" data-tab="moibanbe">
+          <i class="fas fa-user-friends"></i>
+          <span>Mời Bạn</span>
         </button>
-        <button id="upgrade-energy">
-          🔼 Nâng Cấp Năng Lượng (<span id="energy-max">500</span>) – <span id="energy-cost">100</span>💰
+        <button class="content-tab" data-tab="taikhoan">
+          <i class="fas fa-user-circle"></i>
+          <span>Tài Khoản</span>
         </button>
-      </div>
-    </section>
+      </nav>
 
-    <!-- Tab: Nhiệm Vụ -->
-    <section id="tab-nhiemvu" class="tab">
-      <h2>Nhiệm Vụ</h2>
-      <p>💥 Tính năng đang phát triển...</p>
-    </section>
+      <!-- Tab Contents -->
+      <div class="tab-contents">
+        <!-- Mining Tab -->
+        <section id="tab-khaithac" class="tab-content active">
+          <div class="balance-card">
+            <div class="balance-info">
+              <p>Số dư hiện có</p>
+              <h2>
+                <img src="assets/coin.png" alt="Coin" class="coin-icon">
+                <span id="coin-count">0</span>
+              </h2>
+            </div>
+            <button class="btn-withdraw" id="quick-withdraw">
+              <i class="fas fa-wallet"></i>
+              Rút tiền
+            </button>
+          </div>
 
-       <!-- Tab: Mời Bạn Bè -->
-   <section id="tab-moibanbe" class="tab">
-      <h2>Mời Bạn Bè</h2>
-     
-      <div class="ref-section">
-       <p><strong>🎁 Thưởng mời:</strong> <span id="ref-bonus">0</span> 💰</p>
-       <p><strong>👥 Bạn đã mời:</strong> <span id="ref-count">0</span></p>
-
-      <div class="invite-box">
-       <p><strong>🔗 Mã giới thiệu của bạn:</strong></p>
-      <div class="invite-link">
-       <input type="text" id="invite-link" readonly value="" />
-       <button id="copy-link">Copy</button>
-      </div>      
-      </div>
-
-    <div class="ref-list">
-      <h3>Danh sách bạn bè:</h3>
-        <ul id="referrals">
-        <!-- Mẫu hiển thị 1 người bạn -->
-        <!--
-        <li>
-          <span class="ref-name">Mr Hh</span>
-          <span class="ref-coins">+0 💰</span>
-        </li>
-        -->
-        </ul>
-      </div>
-    </div>
-    </section>
-
-
-
-    
-    <!-- Tab: Tài Khoản -->
-    <section id="tab-taikhoan" class="tab active">
-      <h2>Tài Khoản của Bạn</h2>
-
-      <!-- 🔢 Số dư -->
-      <div class="balance-box">
-        <p>Số dư hiện tại:</p>
-        <h3>
-          <img src="assets/coin.png" class="coin-icon" />
-          <span id="account-coin">0</span>
-        </h3>
-      </div>
-
-      <!-- 🎯 Sub Navigation -->
-      <div class="account-nav">
-        <button class="account-tab-btn active" data-target="withdraw-content">
-           Rút Tiền
-        </button>
-        <button class="account-tab-btn" data-target="history-content">
-           Lịch Sử
-        </button>
-      </div>
-
-      <!--  Nội dung Rút Tiền -->
-      <div id="withdraw-content" class="account-content active">
-        <div class="withdraw-container">
-          <h3>Rút Tiền</h3>
-          <form id="withdraw-form">
-            <input type="text" id="bank-account" placeholder="Số tài khoản" required />
-            <input type="text" id="receiver-name" placeholder="Tên người nhận" required />
-            <input type="text" id="bank-name" placeholder="Tên ngân hàng (VD: Vietcombank)" required />
-            <input type="number" id="withdraw-amount" placeholder="Số xu muốn rút (tối thiểu 1000)" min="1000" required />
-            <button type="submit">Gửi Yêu Cầu Rút</button>
-          </form>
-          <p id="withdraw-message"></p>
-        </div>
-      </div>
-
-      <!--  Nội dung Lịch Sử -->
-      <div id="history-content" class="account-content">
-        <div class="history-container">
-          <h3>Lịch Sử Rút Tiền</h3>
-          <ul id="withdraw-history">
-            <li class="success">
-              <div class="withdraw-info">
-                <span class="withdraw-amount">-5,000 💰</span>
-                <span class="withdraw-status success">Thành công</span>
+          <div class="mining-area">
+            <div class="pet-container" id="pet-container">
+              <img src="assets/pet.png" alt="Mining Pet" class="mining-pet" id="mining-pet">
+              <div class="tap-feedback" id="tap-feedback"></div>
+            </div>
+            <div class="mining-stats">
+              <p class="stats-title">Sức mạnh hiện tại</p>
+              <div class="stats-value">
+                <span id="tap-power">1</span> xu/tap
               </div>
-              <div class="withdraw-details">
-                Vietcombank - 1234567890<br>
-                Nguyễn Văn A
-              </div>
-              <div class="withdraw-date">22/12/2024 - 14:30</div>
-            </li>
-            <li class="pending">
-              <div class="withdraw-info">
-                <span class="withdraw-amount">-3,000 💰</span>
-                <span class="withdraw-status pending">Đang xử lý</span>
-              </div>
-              <div class="withdraw-details">
-                BIDV - 9876543210<br>
-                Trần Thị B
-              </div>
-              <div class="withdraw-date">23/12/2024 - 09:15</div>
-            </li>
-            <li class="failed">
-              <div class="withdraw-info">
-                <span class="withdraw-amount">-2,000 💰</span>
-                <span class="withdraw-status failed">Thất bại</span>
-              </div>
-              <div class="withdraw-details">
-                Techcombank - 5555666677<br>
-                Lê Văn C
-              </div>
-              <div class="withdraw-date">20/12/2024 - 16:45</div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </section>
+            </div>
+          </div>
 
+          <div class="energy-container">
+            <div class="energy-info">
+              <i class="fas fa-bolt energy-icon"></i>
+              <div class="energy-bar">
+                <div class="energy-fill" id="energy-fill"></div>
+              </div>
+              <span class="energy-text" id="energy-text">100/200</span>
+            </div>
+            <div class="energy-timer" id="energy-timer">
+              <i class="fas fa-clock"></i>
+              <span>00:10:23</span>
+            </div>
+          </div>
+
+          <div class="upgrade-section">
+            <h3 class="section-title">
+              <i class="fas fa-arrow-up"></i>
+              Nâng Cấp
+            </h3>
+            
+            <div class="upgrade-cards">
+              <div class="upgrade-card">
+                <div class="upgrade-icon power">
+                  <i class="fas fa-fist-raised"></i>
+                </div>
+                <div class="upgrade-info">
+                  <h4>Sức mạnh Tap</h4>
+                  <p>Cấp <span id="tap-level">1</span> (+<span id="tap-bonus">1</span> xu/tap)</p>
+                </div>
+                <button class="upgrade-btn" id="upgrade-tap">
+                  <span class="price"><span id="tap-cost">100</span> 💰</span>
+                  Nâng cấp
+                </button>
+              </div>
+
+              <div class="upgrade-card">
+                <div class="upgrade-icon energy">
+                  <i class="fas fa-battery-three-quarters"></i>
+                </div>
+                <div class="upgrade-info">
+                  <h4>Năng lượng</h4>
+                  <p>Cấp <span id="energy-level">1</span> (Tối đa <span id="energy-max">200</span>)</p>
+                </div>
+                <button class="upgrade-btn" id="upgrade-energy">
+                  <span class="price"><span id="energy-cost">150</span> 💰</span>
+                  Nâng cấp
+                </button>
+              </div>
+
+              <div class="upgrade-card disabled">
+                <div class="upgrade-icon auto">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div class="upgrade-info">
+                  <h4>Auto Tap</h4>
+                  <p>Mở khóa ở level 5</p>
+                </div>
+                <button class="upgrade-btn">
+                  <span class="price">500 💰</span>
+                  Khóa
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Missions Tab -->
+        <section id="tab-nhiemvu" class="tab-content">
+          <div class="missions-container">
+            <h2 class="tab-title">
+              <i class="fas fa-tasks"></i>
+              Nhiệm Vụ Hàng Ngày
+            </h2>
+            
+            <div class="daily-missions">
+              <div class="mission-card">
+                <div class="mission-icon">
+                  <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="mission-details">
+                  <h4>Mời 1 bạn</h4>
+                  <p>Nhận thưởng lớn</p>
+                </div>
+                <button class="mission-reward">
+                  +200 💰
+                </button>
+              </div>
+
+              <div class="mission-card completed">
+                <div class="mission-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="mission-details">
+                  <h4>Đăng nhập ngày</h4>
+                  <p>Đã hoàn thành</p>
+                </div>
+                <button class="mission-reward claimed">
+                  <i class="fas fa-check"></i>
+                  +20 💰
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Referral Tab -->
+        <section id="tab-moibanbe" class="tab-content">
+          <div class="referral-container">
+            <div class="referral-header">
+              <h2 class="tab-title">
+                <i class="fas fa-user-friends"></i>
+                Mời Bạn Bè
+              </h2>
+              <div class="referral-stats">
+                <div class="stat-card">
+                  <i class="fas fa-gift"></i>
+                  <p>Thưởng mời</p>
+                  <h3 id="ref-bonus">0</h3>
+                </div>
+                <div class="stat-card">
+                  <i class="fas fa-users"></i>
+                  <p>Bạn đã mời</p>
+                  <h3 id="ref-count">0</h3>
+                </div>
+              </div>
+            </div>
+
+            <div class="referral-card">
+              <div class="card-header">
+                <i class="fas fa-share-alt"></i>
+                <h3>Chia sẻ mã giới thiệu</h3>
+              </div>
+              <div class="referral-code">
+                <input type="text" id="referral-code" value="XU123456" readonly>
+                <button class="copy-btn" id="copy-referral">
+                  <i class="fas fa-copy"></i>
+                  Copy
+                </button>
+              </div>
+              <p class="referral-note">Bạn nhận được 10% số xu mà người được mời kiếm được trong 7 ngày đầu!</p>
+            </div>
+
+            <div class="referral-list">
+              <h3 class="list-title">
+                <i class="fas fa-list-ul"></i>
+                Danh sách bạn bè
+              </h3>
+              
+              <div class="list-header">
+                <span>Tên</span>
+                <span>Thưởng</span>
+              </div>
+              
+              <div class="friends-list" id="friends-list">
+                <!-- Friend item template -->
+                <div class="friend-item">
+                  <div class="friend-info">
+                    <span class="friend-name">Nguyễn Văn A</span>
+                  </div>
+                  <span class="friend-bonus">+50 💰</span>
+                </div>
+                
+                <div class="friend-item">
+                  <div class="friend-info">
+                    <span class="friend-name">Trần Thị B</span>
+                  </div>
+                  <span class="friend-bonus">+120 💰</span>
+                </div>
+                
+                <div class="empty-state" id="empty-referral" style="display: none;">
+                  <i class="fas fa-user-friends"></i>
+                  <p>Bạn chưa mời ai cả</p>
+                  <small>Chia sẻ mã giới thiệu để mời bạn bè</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Account Tab -->
+        <section id="tab-taikhoan" class="tab-content">
+          <div class="account-container">
+            <div class="account-header">
+              <h2 class="tab-title">
+                <i class="fas fa-user-cog"></i>
+                Tài Khoản
+              </h2>
+              <button class="logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                Đăng xuất
+              </button>
+            </div>
+
+            <div class="account-info">
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-wallet"></i>
+                </div>
+                <div class="info-content">
+                  <p>Số dư khả dụng</p>
+                  <h3 id="account-balance">1,250 💰</h3>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-level-up-alt"></i>
+                </div>
+                <div class="info-content">
+                  <p>Cấp độ hiện tại</p>
+                  <h3>Level <span id="account-level">3</span></h3>
+                </div>
+                <div class="level-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%"></div>
+                  </div>
+                  <span>45%</span>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-trophy"></i>
+                </div>
+                <div class="info-content">
+                  <p>Tổng số xu đã kiếm</p>
+                  <h3 id="total-earned">5,780 💰</h3>
+                </div>
+              </div>
+            </div>
+
+            <div class="account-tabs">
+              <button class="account-tab active" data-tab="withdraw">
+                <i class="fas fa-money-bill-wave"></i>
+                Rút Tiền
+              </button>
+              <button class="account-tab" data-tab="history">
+                <i class="fas fa-history"></i>
+                Lịch Sử
+              </button>
+            </div>
+
+            <!-- Withdraw Content -->
+            <div id="withdraw-content" class="account-tab-content active">
+              <div class="withdraw-card">
+                <h3 class="withdraw-title">
+                  <i class="fas fa-wallet"></i>
+                  Rút tiền về tài khoản ngân hàng
+                </h3>
+                
+                <div class="withdraw-rates">
+                  <div class="rate-card">
+                    <p>1,000 💰 =</p>
+                    <h4>10,000 VND</h4>
+                  </div>
+                  <div class="rate-card">
+                    <p>Phí rút tiền</p>
+                    <h4>5%</h4>
+                  </div>
+                  <div class="rate-card highlight">
+                    <p>Tối thiểu</p>
+                    <h4>1,000 💰</h4>
+                  </div>
+                </div>
+
+                <form id="withdraw-form">
+                  <div class="form-group">
+                    <label for="bank-name">Ngân hàng</label>
+                    <select id="bank-name" class="form-input" required>
+                      <option value="">Chọn ngân hàng</option>
+                      <option value="Vietcombank">Vietcombank</option>
+                      <option value="BIDV">BIDV</option>
+                      <option value="Techcombank">Techcombank</option>
+                      <option value="Agribank">Agribank</option>
+                      <option value="MB Bank">MB Bank</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="bank-account">Số tài khoản</label>
+                    <input type="text" id="bank-account" class="form-input" placeholder="Nhập số tài khoản" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="account-name">Tên chủ tài khoản</label>
+                    <input type="text" id="account-name" class="form-input" placeholder="Nhập tên chủ tài khoản" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="withdraw-amount">Số xu muốn rút</label>
+                    <div class="amount-input">
+                      <input type="number" id="withdraw-amount" class="form-input" placeholder="Tối thiểu 1,000" min="1000" required>
+                      <span class="input-suffix">💰</span>
+                    </div>
+                    <p class="amount-preview">≈ <span id="withdraw-value">0</span> VND (Sau phí)</p>
+                  </div>
+
+                  <button type="submit" class="submit-withdraw">
+                    <i class="fas fa-paper-plane"></i>
+                    Gửi yêu cầu rút tiền
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- History Content -->
+            <div id="history-content" class="account-tab-content">
+              <div class="history-filters">
+                <button class="filter-btn active">Tất cả</button>
+                <button class="filter-btn">Thành công</button>
+                <button class="filter-btn">Đang xử lý</button>
+                <button class="filter-btn">Thất bại</button>
+              </div>
+
+              <div class="history-list" id="withdraw-history">
+                <div class="history-item success">
+                  <div class="item-icon">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div class="item-details">
+                    <h4>-5,000 💰</h4>
+                    <p>Vietcombank - 123****890</p>
+                    <small>22/12/2024 14:30</small>
+                  </div>
+                  <div class="item-status success">
+                    Thành công
+                  </div>
+                </div>
+
+                <div class="history-item pending">
+                  <div class="item-icon">
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <div class="item-details">
+                    <h4>-3,000 💰</h4>
+                    <p>BIDV - 987****210</p>
+                    <small>23/12/2024 09:15</small>
+                  </div>
+                  <div class="item-status pending">
+                    Đang xử lý
+                  </div>
+                </div>
+
+                <div class="history-item failed">
+                  <div class="item-icon">
+                    <i class="fas fa-times-circle"></i>
+                  </div>
+                  <div class="item-details">
+                    <h4>-2,000 💰</h4>
+                    <p>Techcombank - 555****677</p>
+                    <small>20/12/2024 16:45</small>
+                  </div>
+                  <div class="item-status failed">
+                    Thất bại
+                  </div>
+                </div>
+
+                <div class="empty-state" id="empty-history" style="display: none;">
+                  <i class="fas fa-history"></i>
+                  <p>Chưa có giao dịch nào</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="khaithac">
+        <i class="fas fa-hammer"></i>
+        <span>Khai Thác</span>
+      </button>
+      <button class="nav-item" data-tab="nhiemvu">
+        <i class="fas fa-tasks"></i>
+        <span>Nhiệm Vụ</span>
+      </button>
+      <button class="nav-item" data-tab="moibanbe">
+        <i class="fas fa-user-friends"></i>
+        <span>Mời Bạn</span>
+      </button>
+      <button class="nav-item" data-tab="taikhoan">
+        <i class="fas fa-user-circle"></i>
+        <span>Tài Khoản</span>
+      </button>
+    </nav>
   </div>
 
-  <!-- Menu -->
-  <nav class="menu">
-    <button data-tab="khaithac">
-      <img src="assets/khaithac.png" class="icon" />
-      <span>Khai Thác</span>
-    </button>
-    <button data-tab="nhiemvu">
-      <img src="assets/nhiemvu.png" class="icon" />
-      <span>Nhiệm Vụ</span>
-    </button>
-    <button data-tab="moibanbe">
-      <img src="assets/moibanbe.png" class="icon" />
-      <span>Mời Bạn Bè</span>
-    </button>
-    <button data-tab="taikhoan">
-      <img src="assets/vi.png" class="icon" />
-      <span>Tài Khoản</span>
-    </button>
-  </nav>
-</div>
+  <div id="withdraw-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Yêu cầu rút tiền</h3>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="withdraw-result success">
+          <div class="result-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h4>Yêu cầu thành công!</h4>
+          <p>Yêu cầu rút <strong>5,000 💰</strong> của bạn đã được gửi đi.</p>
+          <p>Thời gian xử lý: <strong>1-3 ngày làm việc</strong></p>
+          <button class="modal-btn" id="close-withdraw-modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
