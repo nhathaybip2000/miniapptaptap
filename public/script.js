@@ -55,7 +55,7 @@ function initEventListeners() {
   // Auth forms
   loginForm.addEventListener('submit', handleLogin);
   registerForm.addEventListener('submit', handleRegister);
-  logoutBtn.addEventListener('submit', handleLogout);
+  logoutBtn.addEventListener('click', handleLogout);
   
   // Tab switching
   document.querySelectorAll('.tab-button').forEach(button => {
@@ -744,17 +744,17 @@ function showMainApp() {
 
 // Chuyển tab auth
 function switchAuthTab(e) {
-  const tab = e.target.dataset.tab;
-  
+  const tab = e.currentTarget.dataset.tab; // dùng e.currentTarget thay vì e.target
+
   document.querySelectorAll('.tab-button').forEach(button => {
     button.classList.remove('active');
   });
-  
+
   document.querySelectorAll('.form-section').forEach(section => {
     section.classList.remove('active');
   });
-  
-  e.target.classList.add('active');
+
+  e.currentTarget.classList.add('active');
   document.getElementById(`${tab}-form`).classList.add('active');
 }
 
