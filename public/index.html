@@ -8,26 +8,110 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-  
-    <!-- Modal Nhập Mã Mời -->
-<div id="referral-modal" class="modal">
-  <div class="modal-content">
-    <h3>Nhập mã mời</h3>
-    <input type="number" id="referral-input" placeholder="Nhập ID người giới thiệu" />
-    <div class="modal-buttons">
-      <button id="referral-confirm">Xác nhận</button>
-      <button id="referral-skip">Bỏ qua</button>
-    </div>
+
+  <div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
   </div>
-</div>
 
+  <div class="auth-container">
+    <div class="logo-section">
+      <div class="logo">
+        <i class="fas fa-coins"></i>
+      </div>
+      <h1 class="app-title">COIN XU TAP TAP</h1>
+      <p class="app-subtitle">Chào mừng bạn đến với thế giới coin</p>
+    </div>
 
+    <div class="auth-tabs">
+      <button class="tab-button active" onclick="switchTab('login')">Đăng Nhập</button>
+      <button class="tab-button" onclick="switchTab('register')">Đăng Ký</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="success-message" class="success-message" style="display: none;"></div>
+    <div id="error-message" class="error-message" style="display: none;"></div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="form-section active">
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">Email hoặc Tên đăng nhập</label>
+          <div class="input-container">
+            <input type="text" id="login-email" class="form-input" placeholder="Nhập email hoặc tên đăng nhập" required>
+            <i class="fas fa-user input-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Mật khẩu</label>
+          <div class="input-container">
+            <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required>
+            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('login-password', this)"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+          <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
+          Đăng Nhập
+        </button>
+      </form>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="form-section">
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="register-username">Tên đăng nhập</label>
+          <div class="input-container">
+            <input type="text" id="register-username" class="form-input" placeholder="Nhập tên đăng nhập" required>
+            <i class="fas fa-user input-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <div class="input-container">
+            <input type="email" id="register-email" class="form-input" placeholder="Nhập địa chỉ email" required>
+            <i class="fas fa-envelope input-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="register-password">Mật khẩu</label>
+          <div class="input-container">
+            <input type="password" id="register-password" class="form-input" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" required minlength="6">
+            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('register-password', this)"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="register-confirm">Xác nhận mật khẩu</label>
+          <div class="input-container">
+            <input type="password" id="register-confirm" class="form-input" placeholder="Nhập lại mật khẩu" required>
+            <i class="fas fa-eye password-toggle input-icon" onclick="togglePassword('register-confirm', this)"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="register-referral">Mã giới thiệu (tùy chọn)</label>
+          <div class="input-container">
+            <input type="text" id="register-referral" class="form-input" placeholder="Nhập mã giới thiệu (nếu có)">
+            <i class="fas fa-gift input-icon"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-button">
+          <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
+          Đăng Ký
+        </button>
+      </form>
+
+<div id="main-app" style="display: none;">
   <div class="container">
     <!-- Tab: Khai Thác -->
     <section id="tab-khaithac" class="tab active">
-          <div class="welcome">
-            <p id="greeting">Đang tải thông tin người dùng...</p>
-          </div>
       <section class="balance">
         <p>Your Balance</p>
         <h2>
@@ -201,8 +285,8 @@
       <span>Tài Khoản</span>
     </button>
   </nav>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
 </html>
