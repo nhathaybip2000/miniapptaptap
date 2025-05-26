@@ -1,12 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
+import bcrypt from 'bcryptjs';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
-
-  console.log("Supabase URL:", process.env.SUPABASE_URL);
-  console.log("Supabase Key:", process.env.SUPABASE_KEY ? "OK" : "MISSING");
 
   const { username, email, password, referral } = req.body;
 
@@ -14,6 +12,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin.' });
   }
 
+  // Kiểm tra user/email trùng
   const { data: existingUsers, error: checkError } = await supabase
     .from('users')
     .select('id')
@@ -28,12 +27,16 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Email hoặc Username đã tồn tại.' });
   }
 
+  // ✅ Mã hóa mật khẩu
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Lưu vào DB
   const { data, error } = await supabase
     .from('users')
     .insert([{
       username,
       email,
-      password, // cần mã hóa bằng bcrypt sau này
+      password: hashedPassword, // dùng password đã mã hóa
       created_at: new Date().toISOString(),
       tcd_balance: 0,
       vndc_balance: 0,
