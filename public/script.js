@@ -97,4 +97,45 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => { area.innerHTML = ""; }, 4000);
     }
   });
+  document.getElementById('register-form-data').addEventListener('submit', async function (e) {
+    e.preventDefault();
+  
+    const username = document.getElementById('register-username').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+    const confirmPassword = document.getElementById('register-confirm').value;
+    const referral = document.getElementById('register-referral').value.trim();
+    const termsChecked = document.getElementById('terms-agree').checked;
+  
+    if (!termsChecked) {
+      alert('Bạn phải đồng ý với điều khoản.');
+      return;
+    }
+  
+    if (password !== confirmPassword) {
+      alert('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+  
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, referral }),
+      });
+  
+      const data = await res.json();
+  
+      if (res.ok) {
+        alert('Đăng ký thành công!');
+        // Chuyển sang đăng nhập hoặc trang chính
+        window.location.href = '/login.html';
+      } else {
+        alert('Lỗi: ' + data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Đăng ký thất bại. Vui lòng thử lại.');
+    }
+  });
   
