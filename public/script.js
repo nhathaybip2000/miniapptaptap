@@ -72,20 +72,41 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const emailOrUsername = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
-
+  
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emailOrUsername, password }),
       });
-
+  
       const data = await res.json();
       if (res.ok) {
+        const user = data.user;
         showNotification("Đăng nhập thành công", "success");
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(user));
+  
         setTimeout(() => {
-          window.location.href = "/home.html";
+          // Ẩn form login/register
+          document.getElementById("auth-section").style.display = "none";
+  
+          if (user.role === "admin") {
+            // Hiện giao diện admin
+            document.querySelector(".admin-container").style.display = "block";
+            document.getElementById("main-app").style.display = "none";
+          } else {
+            // Hiện giao diện người dùng
+            document.getElementById("main-app").style.display = "block";
+            document.querySelector(".admin-container").style.display = "none";
+  
+            // Cập nhật tên và số dư
+            document.getElementById("username-display").textContent = user.username;
+            document.getElementById("tcd-balance").textContent = user.tcd_balance;
+            document.getElementById("tcd-balance-display").textContent = user.tcd_balance;
+            document.getElementById("vndc-balance-display").textContent = user.vndc_balance;
+            document.getElementById("account-tcd-balance").textContent = user.tcd_balance;
+            document.getElementById("account-vndc-balance").textContent = user.vndc_balance;
+          }
         }, 800);
       } else {
         showNotification(data.message || data.error || "Lỗi đăng nhập", "error");
@@ -94,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showNotification("Lỗi kết nối máy chủ", "error");
     }
   });
+  
 
   // Hiển thị thông báo
   function showNotification(message, type = "info") {

@@ -1,4 +1,3 @@
-// /api/login.js
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 
@@ -15,10 +14,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Thiếu thông tin đăng nhập' });
   }
 
-  // Lấy người dùng theo email hoặc username
+  // Truy vấn user kèm theo role
   const { data: users, error } = await supabase
     .from('users')
-    .select('*')
+    .select('id, username, email, password, role, tcd_balance, vndc_balance') // chỉ chọn các trường cần thiết
     .or(`email.eq.${emailOrUsername},username.eq.${emailOrUsername}`)
     .limit(1)
     .single();
@@ -27,14 +26,18 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Sai tài khoản hoặc mật khẩu' });
   }
 
-  // So sánh password nhập vào với password hash
+  // Kiểm tra mật khẩu
   const isMatch = await bcrypt.compare(password, users.password);
   if (!isMatch) {
     return res.status(401).json({ error: 'Sai tài khoản hoặc mật khẩu' });
   }
 
-  // Xóa password trước khi trả về
+  // Xóa password trước khi trả về client
   delete users.password;
 
-  return res.status(200).json({ message: 'Đăng nhập thành công', user: users });
+  // ✅ Trả về cả role trong thông tin user
+  return res.status(200).json({
+    message: 'Đăng nhập thành công',
+    user: users, // chứa cả role
+  });
 }
