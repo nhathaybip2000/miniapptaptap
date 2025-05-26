@@ -2,39 +2,311 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>COIN XU TAP TAP - Game kiếm xu thú vị</title>
+  <title>COIN TCD MINING - Game khai thác đồng TCD</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <!-- Authentication Section -->
+  <div class="admin-container">
+    <div class="admin-header">
+      <button class="logout-btn" onclick="adminLogout()">
+        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+      </button>
+      <h1>
+        <i class="fas fa-shield-alt"></i>
+        TCD MINING ADMIN
+      </h1>
+      <p class="subtitle">Bảng điều khiển quản trị hệ thống</p>
+    </div>
+
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value" id="total-users">1,234</div>
+        <div class="stat-label">Tổng người dùng</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-coins"></i>
+        </div>
+        <div class="stat-value" id="total-tcd">45,678</div>
+        <div class="stat-label">Tổng TCD đã phát</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-exchange-alt"></i>
+        </div>
+        <div class="stat-value" id="total-exchanges">892</div>
+        <div class="stat-label">Giao dịch hôm nay</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="stat-value" id="pending-withdraws">23</div>
+        <div class="stat-label">Yêu cầu rút tiền</div>
+      </div>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="showTab('users')">
+        <i class="fas fa-users"></i> Quản lý User
+      </button>
+      <button class="admin-tab" onclick="showTab('withdraws')">
+        <i class="fas fa-money-bill-wave"></i> Rút tiền
+      </button>
+      <button class="admin-tab" onclick="showTab('system')">
+        <i class="fas fa-cogs"></i> Cài đặt hệ thống
+      </button>
+      <button class="admin-tab" onclick="showTab('reports')">
+        <i class="fas fa-chart-bar"></i> Báo cáo
+      </button>
+      <button class="admin-tab" onclick="showTab('broadcasts')">
+        <i class="fas fa-bullhorn"></i> Thông báo
+      </button>
+    </div>
+    <div id="users-tab" class="tab-content active">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h2><i class="fas fa-users"></i> Quản lý người dùng</h2>
+        <div>
+          <input type="text" placeholder="Tìm kiếm user..." style="padding:10px;border-radius:8px;border:1px solid #ddd;margin-right:10px">
+        </div>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên đăng nhập</th>
+            <th>Email</th>
+            <th>TCD Balance</th>
+            <th>VNDC Balance</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="users-table">
+          <tr>
+            <td>1</td>
+            <td>user123</td>
+            <td>user@example.com</td>
+            <td>1,250 TCD</td>
+            <td>45.30 VNDC</td>
+            <td>2024-01-15</td>
+            <td><span style="color:#27ae60;font-weight:600">Hoạt động</span></td>
+            <td>
+              <button class="action-btn btn-edit" onclick="editUser(1)">Sửa</button>
+              <button class="action-btn btn-delete" onclick="deleteUser(1)">Xóa</button>
+            </td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>miner456</td>
+            <td>miner@example.com</td>
+            <td>890 TCD</td>
+            <td>12.50 VNDC</td>
+            <td>2024-01-20</td>
+            <td><span style="color:#e74c3c;font-weight:600">Bị khóa</span></td>
+            <td>
+              <button class="action-btn btn-edit" onclick="editUser(2)">Sửa</button>
+              <button class="action-btn btn-approve" onclick="unlockUser(2)">Mở khóa</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="withdraws-tab" class="tab-content">
+      <h2><i class="fas fa-money-bill-wave"></i> Quản lý yêu cầu rút tiền</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Số tiền</th>
+            <th>Ngân hàng</th>
+            <th>Số TK</th>
+            <th>Ngày yêu cầu</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>user123</td>
+            <td>50 VNDC</td>
+            <td>Vietcombank</td>
+            <td>123****890</td>
+            <td>2024-12-23 14:30</td>
+            <td><span style="color:#f39c12;font-weight:600">Chờ duyệt</span></td>
+            <td>
+              <button class="action-btn btn-approve" onclick="approveWithdraw(1)">Duyệt</button>
+              <button class="action-btn btn-reject" onclick="rejectWithdraw(1)">Từ chối</button>
+            </td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>miner456</td>
+            <td>30 VNDC</td>
+            <td>BIDV</td>
+            <td>987****210</td>
+            <td>2024-12-23 09:15</td>
+            <td><span style="color:#27ae60;font-weight:600">Đã duyệt</span></td>
+            <td>
+              <button class="action-btn btn-edit" onclick="viewWithdraw(2)">Xem</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="system-tab" class="tab-content">
+      <h2><i class="fas fa-cogs"></i> Cài đặt hệ thống</h2>
+      <div class="form-grid">
+        <div>
+          <h3>Cài đặt khai thác</h3>
+          <div class="form-group">
+            <label>Thời gian khai thác (phút)</label>
+            <input type="number" class="form-input" value="10" id="mining-time">
+          </div>
+          <div class="form-group">
+            <label>TCD reward mỗi lần khai thác</label>
+            <input type="number" class="form-input" value="100" id="mining-reward">
+          </div>
+          <div class="form-group">
+            <label>Phí giao dịch (%)</label>
+            <input type="number" class="form-input" value="2" step="0.1" id="transaction-fee">
+          </div>
+        </div>
+        <div>
+          <h3>Tỷ giá</h3>
+          <div class="form-group">
+            <label>1 TCD = ? VNDC</label>
+            <input type="number" class="form-input" value="0.1" step="0.01" id="tcd-to-vndc">
+          </div>
+          <div class="form-group">
+            <label>1 VNDC = ? TCD</label>
+            <input type="number" class="form-input" value="10" id="vndc-to-tcd">
+          </div>
+          <div class="form-group">
+            <label>Trạng thái sàn giao dịch</label>
+            <select class="form-input" id="exchange-status">
+              <option value="open">Mở</option>
+              <option value="closed">Đóng</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="saveSystemSettings()">
+        <i class="fas fa-save"></i> Lưu cài đặt
+      </button>
+    </div>
+    <div id="reports-tab" class="tab-content">
+      <h2><i class="fas fa-chart-bar"></i> Báo cáo thống kê</h2>
+      <div class="admin-stats">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+          <div class="stat-value">156</div>
+          <div class="stat-label">User mới hôm nay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-hammer"></i></div>
+          <div class="stat-value">2,847</div>
+          <div class="stat-label">Lượt khai thác hôm nay</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-coins"></i></div>
+          <div class="stat-value">28,470</div>
+          <div class="stat-label">TCD được khai thác</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stat-value">1,234</div>
+          <div class="stat-label">VNDC đã rút</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:30px">
+        <div style="background:white;padding:20px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.1)">
+          <h3>Top người dùng TCD</h3>
+          <div style="margin-top:15px">
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee">
+              <span>user123</span><strong>5,430 TCD</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee">
+              <span>miner456</span><strong>4,120 TCD</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee">
+              <span>crypto999</span><strong>3,890 TCD</strong>
+            </div>
+          </div>
+        </div>
+        <div style="background:white;padding:20px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.1)">
+          <h3>Giao dịch gần đây</h3>
+          <div style="margin-top:15px">
+            <div style="padding:10px 0;border-bottom:1px solid #eee">
+              <div style="display:flex;justify-content:space-between">
+                <span>user123</span><span style="color:#e74c3c">-50 VNDC</span>
+              </div>
+              <small style="color:#999">Rút tiền - 14:30</small>
+            </div>
+            <div style="padding:10px 0;border-bottom:1px solid #eee">
+              <div style="display:flex;justify-content:space-between">
+                <span>miner456</span><span style="color:#27ae60">+100 TCD</span>
+              </div>
+              <small style="color:#999">Khai thác - 14:25</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="broadcasts-tab" class="tab-content">
+      <h2><i class="fas fa-bullhorn"></i> Gửi thông báo</h2>
+      <div style="max-width:600px">
+        <div class="form-group">
+          <label>Tiêu đề thông báo</label>
+          <input type="text" class="form-input" placeholder="Nhập tiêu đề..." id="broadcast-title">
+        </div>
+        <div class="form-group">
+          <label>Nội dung</label>
+          <textarea class="form-input" rows="5" placeholder="Nhập nội dung thông báo..." id="broadcast-content"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Gửi đến</label>
+          <select class="form-input" id="broadcast-target">
+            <option value="all">Tất cả người dùng</option>
+            <option value="active">Chỉ user đang hoạt động</option>
+            <option value="specific">User cụ thể</option>
+          </select>
+        </div>
+        <button class="submit-btn" onclick="sendBroadcast()">
+          <i class="fas fa-paper-plane"></i> Gửi thông báo
+        </button>
+      </div>
+    </div>
+  </div>
    <div id="auth-section" class="auth-section">
     <div class="auth-container">
       <div class="logo-section">
         <div class="coin-logo">
-          <i class="fas fa-coins"></i>
+          <i class="fas fa-hammer"></i>
         </div>
-        <h1 class="app-title">COIN XU TAP TAP</h1>
-        <p class="app-subtitle">Kiếm xu - Rút tiền thật dễ dàng</p>
+        <h1 class="app-title">COIN TCD MINING</h1>
+        <p class="app-subtitle">Khai thác TCD - Trao đổi VNDC dễ dàng</p>
       </div>
-
       <div class="auth-tabs">
         <button class="tab-button active" data-tab="login">Đăng Nhập</button>
         <button class="tab-button" data-tab="register">Đăng Ký</button>
       </div>
-
       <div id="notification-area"></div>
-
-      <!-- Login Form -->
       <div id="login-form" class="form-section active">
         <form id="login-form-data">
           <div class="form-group">
             <label for="login-email">Email/Tên đăng nhập</label>
             <div class="input-container">
               <input type="text" id="login-email" class="form-input" placeholder="Nhập email hoặc tên đăng nhập" required>
-              <i class="fas fa-user input-icon"></i>
+              <i class="fas fa-user account-toggle input-icon"></i>
             </div>
           </div>
           <div class="form-group">
@@ -49,22 +321,20 @@
           </button>
         </form>
       </div>
-
-      <!-- Register Form -->
       <div id="register-form" class="form-section">
         <form id="register-form-data">
           <div class="form-group">
             <label for="register-username">Tên đăng nhập</label>
             <div class="input-container">
               <input type="text" id="register-username" class="form-input" placeholder="Từ 4-16 ký tự" required minlength="4" maxlength="16">
-              <i class="fas fa-user input-icon"></i>
+              <i class="fas fa-user account-toggle input-icon"></i>
             </div>
           </div>
           <div class="form-group">
             <label for="register-email">Email</label>
             <div class="input-container">
               <input type="email" id="register-email" class="form-input" placeholder="Địa chỉ email hợp lệ" required>
-              <i class="fas fa-envelope input-icon"></i>
+              <i class="fas fa-envelope account-toggle input-icon"></i>
             </div>
           </div>
           <div class="form-row">
@@ -87,7 +357,7 @@
             <label for="register-referral">Mã giới thiệu <span style="color: #999;">(tùy chọn)</span></label>
             <div class="input-container">
               <input type="text" id="register-referral" class="form-input" placeholder="Nhập mã nếu có">
-              <i class="fas fa-gift input-icon"></i>
+              <i class="fas fa-gift account-toggle input-icon"></i>
             </div>
           </div>
           <div class="form-checkbox">
@@ -101,14 +371,11 @@
       </div>
     </div>
   </div>
-
-  <!-- Main App -->
   <div id="main-app" class="main-app">
     <header class="app-header">
       <div class="user-profile">
         <div class="user-info">
           <h3 id="username-display">Tên người dùng</h3>
-          <p class="user-level">Level <span id="user-level">1</span></p>
         </div>
       </div>
       <button class="notification-btn" id="notification-bell">
@@ -116,110 +383,266 @@
         <span class="badge">3</span>
       </button>
     </header>
-
     <main class="app-content">
       <div class="tab-contents">
-        <!-- Mining Tab -->
         <section id="tab-khaithac" class="tab-content active">
           <div class="balance-card">
-            <div class="balance-info">
-              <p>Số dư hiện có</p>
-              <h2>
-                💰 <span id="coin-count">0</span>
-              </h2>
-            </div>
-          </div>
-
-          <div class="mining-area">
-            <div class="pet-container" id="pet-container">
-              <img src="assets/pet.png" alt="Mining Pet" class="mining-pet" id="mining-pet">
-              <div class="tap-feedback" id="tap-feedback"></div>
-            </div>
-          </div>
-
-          <div class="energy-container">
-            <div class="energy-info">
-              <i class="fas fa-bolt energy-icon"></i>
-              <div class="energy-bar">
-                <div class="energy-fill" id="energy-fill"></div>
+            <div class="balance-row">
+              <div class="balance-info">
+                <p>TCD COIN</p>
+                <h2><span id="tcd-balance">0</span></h2>
               </div>
-              <span class="energy-text" id="energy-text">100/200</span>
             </div>
           </div>
-
+          <div class="mining-area">
+            <div class="mining-container">
+              <div class="mining-tool">
+                <i class="fas fa-hammer mining-hammer" id="mining-hammer"></i>
+              </div>
+              <div class="mining-timer">
+                <div class="timer-display">
+                  <span id="mining-countdown">10:00</span>
+                </div>
+                <p class="timer-label">Thời gian khai thác tiếp theo</p>
+              </div>
+            </div>
+            <button class="mining-btn" id="start-mining" disabled>
+              <i class="fas fa-play"></i>
+              Bắt đầu khai thác
+            </button>
+          </div>
           <div class="upgrade-section">
             <h3 class="section-title">
               <i class="fas fa-arrow-up"></i>
-              Nâng Cấp
+              Nâng Cấp Khai Thác
             </h3>
-            
             <div class="upgrade-cards">
               <div class="upgrade-card">
-                <div class="upgrade-icon power">
-                  <i class="fas fa-fist-raised"></i>
+                <div class="upgrade-icon mining">
+                  <i class="fas fa-tachometer-alt"></i>
                 </div>
                 <div class="upgrade-info">
-                  <h4>Sức mạnh Tap</h4>
-                  <p>Cấp <span id="tap-level">1</span> (+<span id="tap-bonus">1</span> xu/tap)</p>
+                  <h4>Tốc độ khai thác</h4>
+                  <p>Cấp <span id="speed-level">1</span> (Giảm <span id="speed-reduction">0</span> phút)</p>
                 </div>
-                <button class="upgrade-btn" id="upgrade-tap">
-                  <span id="tap-cost">100</span> 💰
+                <button class="upgrade-btn" id="upgrade-speed">
+                  <span id="speed-cost">500</span> TCD
                 </button>
               </div>
-
               <div class="upgrade-card">
-                <div class="upgrade-icon energy">
-                  <i class="fas fa-battery-three-quarters"></i>
+                <div class="upgrade-icon power">
+                  <i class="fas fa-gem"></i>
                 </div>
                 <div class="upgrade-info">
-                  <h4>Năng lượng</h4>
-                  <p>Cấp <span id="energy-level">1</span> (Max <span id="energy-max">200</span>)</p>
+                  <h4>Sản lượng khai thác</h4>
+                  <p>Cấp <span id="mining-level">1</span> (+<span id="mining-bonus">10</span> TCD/lần)</p>
                 </div>
-                <button class="upgrade-btn" id="upgrade-energy">
-                  <span id="energy-cost">150</span> 💰
+                <button class="upgrade-btn" id="upgrade-mining">
+                  <span id="mining-cost">300</span> TCD
                 </button>
               </div>
-
             </div>
           </div>
         </section>
-
-        <!-- Missions Tab -->
+        <section id="tab-traodoi" class="tab-content">
+          <div class="exchange-header">
+            <h2 class="tab-title">
+              <i class="fas fa-exchange-alt"></i>
+              Trao Đổi Coin
+            </h2>
+            <div class="exchange-status open" id="exchange-status">
+              <span class="status-indicator available"></span>
+              <span>Sàn đang mở - Còn <span id="exchange-countdown">6 ngày 23:45:30</span></span>
+            </div>
+            <div class="exchange-status closed" id="exchange-status">
+              <span class="status-indicator unavailable"></span>
+              <span>Sàn đã đóng - Mở lại vào Thứ 7 tuần tới</span>
+            </div>
+          </div>
+          <div class="exchange-container">
+            <div class="exchange-tabs">
+              <button class="exchange-tab active" data-tab="tcd-to-vndc">TCD → VNDC</button>
+              <button class="exchange-tab" data-tab="vndc-to-tcd">VNDC → TCD</button>
+            </div>
+            <div id="tcd-to-vndc" class="exchange-tab-content active">
+              <div class="exchange-card">
+                <div class="exchange-rate">
+                  <div class="rate-info">
+                    <span>Tỷ giá hiện tại</span>
+                    <strong>1 TCD = 0.1 VNDC</strong>
+                  </div>
+                </div>
+                <form class="exchange-form">
+                  <div class="form-group">
+                    <label>Số TCD muốn đổi</label>
+                    <div class="input-with-max">
+                      <input type="number" id="tcd-amount" class="form-input" placeholder="0" min="1">
+                      <button type="button" class="max-btn" onclick="setMaxTCD()">Max</button>
+                    </div>
+                    <p class="balance-text">Số dư: <span id="tcd-balance-display">0</span> TCD</p>
+                  </div>
+                  <div class="exchange-arrow">
+                    <i class="fas fa-arrow-down"></i>
+                  </div>
+                  <div class="form-group">
+                    <label>Nhận được</label>
+                    <input type="text" id="vndc-receive" class="form-input" readonly placeholder="0">
+                    <p class="fee-text">Phí giao dịch: 2%</p>
+                  </div>
+                  <button type="submit" class="exchange-btn" id="exchange-tcd-btn">
+                    <i class="fas fa-exchange-alt"></i>
+                    Đổi TCD → VNDC
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div id="vndc-to-tcd" class="exchange-tab-content">
+              <div class="exchange-card">
+                <div class="exchange-rate">
+                  <div class="rate-info">
+                    <span>Tỷ giá hiện tại</span>
+                    <strong>1 VNDC = 10 TCD</strong>
+                  </div>
+                </div>
+                <form class="exchange-form">
+                  <div class="form-group">
+                    <label>Số VNDC muốn đổi</label>
+                    <div class="input-with-max">
+                      <input type="number" id="vndc-amount" class="form-input" placeholder="0" min="0.1" step="0.1">
+                      <button type="button" class="max-btn" onclick="setMaxVNDC()">Max</button>
+                    </div>
+                    <p class="balance-text">Số dư: <span id="vndc-balance-display">0</span> VNDC</p>
+                  </div>
+                  <div class="exchange-arrow">
+                    <i class="fas fa-arrow-down"></i>
+                  </div>
+                  <div class="form-group">
+                    <label>Nhận được</label>
+                    <input type="text" id="tcd-receive" class="form-input" readonly placeholder="0">
+                    <p class="fee-text">Phí giao dịch: 2%</p>
+                  </div>
+                  <button type="submit" class="exchange-btn" id="exchange-vndc-btn">
+                    <i class="fas fa-exchange-alt"></i>
+                    Đổi VNDC → TCD
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
         <section id="tab-nhiemvu" class="tab-content">
           <h2 class="tab-title">
             <i class="fas fa-tasks"></i>
             Nhiệm Vụ Hàng Ngày
           </h2>
-          
-          <div class="mission-card">
+<div class="ad-mission-card" id="ad-mission-card">
+  <div class="ad-mission-header">
+    <div class="ad-mission-info">
+      <div class="ad-mission-icon">
+        <i class="fas fa-play-circle"></i>
+      </div>
+      <div class="ad-mission-details">
+        <h4>Xem Quảng Cáo</h4>
+        <p>Xem video để nhận thưởng</p>
+      </div>
+    </div>
+    <button class="ad-watch-btn" id="watch-ad-btn">
+      <i class="fas fa-play"></i>
+      Xem Ngay
+    </button>
+  </div>
+  <div class="ad-stats">
+    <div class="ad-stats-item">
+      <i class="fas fa-eye"></i>
+      <span>Đã xem: <span id="ads-watched-today">0</span> lần hôm nay</span>
+    </div>
+    <div class="ad-stats-item">
+      <i class="fas fa-coins"></i>
+      <span>+100 TCD/lần</span>
+    </div>
+  </div>
+  <div class="ad-countdown" id="ad-cooldown" style="display: none;">
+    <i class="fas fa-clock"></i>
+    <span>Còn <span id="ad-timer">5:00</span> để xem tiếp</span>
+  </div>
+</div>
+<div id="video-modal" class="video-modal">
+  <div class="video-container">
+    <div class="video-placeholder">
+      <i class="fas fa-play-circle" style="font-size: 48px; opacity: 0.8;"></i>
+      <div class="video-timer" id="video-timer">15s</div>
+    </div>
+    <div class="video-controls">
+      <button class="close-video" id="close-video">
+        <i class="fas fa-times"></i> Đóng
+      </button>
+      <button class="reward-video" id="claim-reward" disabled>
+        <i class="fas fa-gift"></i> Nhận +100 TCD
+      </button>
+    </div>
+  </div>
+</div>
+          <div class="mission-card" id="daily-login-mission">
             <div class="mission-icon">
-              <i class="fas fa-user-plus"></i>
+              <i class="fas fa-calendar-check"></i>
             </div>
             <div class="mission-details">
-              <h4>Mời 1 bạn</h4>
-              <p>Nhận thưởng lớn</p>
+              <h4>Đăng nhập hàng ngày</h4>
+              <p>Nhận thưởng mỗi ngày</p>
+              <div class="mission-progress">
+                <span>Ngày <span id="login-streak">1</span>/7</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 14%"></div>
+                </div>
+              </div>
             </div>
-            <button class="mission-reward">
-              +200 💰
+            <button class="mission-reward" id="daily-login-btn">
+              +50 TCD
             </button>
           </div>
+          <div class="mission-section">
+            <h3 class="mission-section-title">Nhiệm vụ mời bạn bè</h3>
+            
+            <div class="mission-card" id="referral-5-mission">
+              <div class="mission-icon">
+                <i class="fas fa-user-plus"></i>
+              </div>
+              <div class="mission-details">
+                <h4>Mời 5 bạn bè</h4>
+                <p>Tiến độ: <span id="referral-5-progress">0/5</span></p>
+              </div>
+              <button class="mission-reward" id="referral-5-btn">
+                +500 TCD
+              </button>
+            </div>
 
-          <div class="mission-card completed">
-            <div class="mission-icon">
-              <i class="fas fa-check-circle"></i>
+            <div class="mission-card" id="referral-10-mission">
+              <div class="mission-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="mission-details">
+                <h4>Mời 10 bạn bè</h4>
+                <p>Tiến độ: <span id="referral-10-progress">0/10</span></p>
+              </div>
+              <button class="mission-reward" id="referral-10-btn">
+                +1.200 TCD
+              </button>
             </div>
-            <div class="mission-details">
-              <h4>Đăng nhập ngày</h4>
-              <p>Đã hoàn thành</p>
+
+            <div class="mission-card" id="referral-15-mission">
+              <div class="mission-icon">
+                <i class="fas fa-crown"></i>
+              </div>
+              <div class="mission-details">
+                <h4>Mời 15 bạn bè</h4>
+                <p>Tiến độ: <span id="referral-15-progress">0/15</span></p>
+              </div>
+              <button class="mission-reward" id="referral-15-btn">
+                +2.500 TCD
+              </button>
             </div>
-            <button class="mission-reward claimed">
-              <i class="fas fa-check"></i>
-              +20 💰
-            </button>
           </div>
         </section>
-
-        <!-- Referral Tab -->
         <section id="tab-moibanbe" class="tab-content">
           <div class="referral-header">
             <h2 class="tab-title">
@@ -228,14 +651,14 @@
             </h2>
             <div class="referral-stats">
               <div class="stat-card">
-                <i class="fas fa-gift"></i>
-                <p>Thưởng mời</p>
-                <h3 id="ref-bonus">0</h3>
+                <i class="fas fa-users"></i>
+                <p>Cấp dưới</p>
+                <h3 id="total-referrals">0</h3>
               </div>
               <div class="stat-card">
-                <i class="fas fa-users"></i>
-                <p>Bạn đã mời</p>
-                <h3 id="ref-count">0</h3>
+                <i class="fas fa-percentage"></i>
+                <p>Hoa hồng 1%</p>
+                <h3 id="total-commission">0 </h3>
               </div>
             </div>
           </div>
@@ -246,45 +669,40 @@
               <h3>Chia sẻ mã giới thiệu</h3>
             </div>
             <div class="referral-code">
-              <input type="text" id="referral-code" value="XU123456" readonly>
+              <input type="text" id="referral-code" value="TCD123456" readonly>
               <button class="copy-btn" id="copy-referral">
                 <i class="fas fa-copy"></i>
                 Copy
               </button>
             </div>
-            <p class="referral-note">Bạn nhận được 10% số xu mà người được mời kiếm được trong 7 ngày đầu!</p>
+            <p class="referral-note">Bạn nhận được 1% hoa hồng từ việc khai thác TCD của cấp dưới!</p>
           </div>
 
           <div class="referral-list">
             <h3 class="list-title">
               <i class="fas fa-list-ul"></i>
-              Danh sách bạn bè
+              Danh sách cấp dưới
             </h3>
             
             <div class="list-header">
               <span>Tên</span>
-              <span>Thưởng</span>
+              <span>TCD nắm giữ</span>
             </div>
-            
-            <div class="friends-list" id="friends-list">
-              <div class="friend-item">
-                <div class="friend-info">
-                  <span class="friend-name">Nguyễn Văn A</span>
+            <div class="downline-list" id="downline-list">
+              <div class="downline-item">
+                <div class="downline-info">
+                  <span class="downline-name">Nguyễn Văn A</span>
                 </div>
-                <span class="friend-bonus">+50 💰</span>
+    
               </div>
-              
-              <div class="friend-item">
-                <div class="friend-info">
-                  <span class="friend-name">Trần Thị B</span>
+              <div class="downline-item">
+                <div class="downline-info">
+                  <span class="downline-name">Trần Thị B</span>
                 </div>
-                <span class="friend-bonus">+120 💰</span>
               </div>
             </div>
           </div>
         </section>
-
-        <!-- Account Tab -->
         <section id="tab-taikhoan" class="tab-content">
           <div class="account-header">
             <h2 class="tab-title">
@@ -296,36 +714,41 @@
               Đăng xuất
             </button>
           </div>
-
-          <div class="account-info">
-            <div class="info-card">
-              <div class="info-icon">
-                <i class="fas fa-wallet"></i>
+          <div class="account-balance-cards">
+            <div class="balance-card-item">
+              <div class="balance-icon">
+                <i class="fas fa-coins"></i>
               </div>
-              <div class="info-content">
-                <p>Số dư khả dụng</p>
-                <h3 id="account-balance">1,250 💰</h3>
+              <div class="balance-content">
+                <p>TCD Coin</p>
+                <h3 id="account-tcd-balance">0 </h3>
+              </div>
+            </div>
+            <div class="balance-card-item">
+              <div class="balance-icon">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="balance-content">
+                <p>VNDC</p>
+                <h3 id="account-vndc-balance">0 </h3>
               </div>
             </div>
           </div>
-
           <div class="account-tabs">
             <button class="account-tab active" data-tab="withdraw">
               <i class="fas fa-money-bill-wave"></i>
-              Rút Tiền
+              Rút VNDC
             </button>
             <button class="account-tab" data-tab="history">
               <i class="fas fa-history"></i>
               Lịch Sử
             </button>
           </div>
-
-          <!-- Withdraw Content -->
           <div id="withdraw-content" class="account-tab-content active">
             <div class="withdraw-card">
               <h3 class="withdraw-title">
                 <i class="fas fa-wallet"></i>
-                Rút tiền về tài khoản ngân hàng
+                Rút VNDC về tài khoản ngân hàng
               </h3>
               <form id="withdraw-form">
                 <div class="form-group">
@@ -339,35 +762,29 @@
                     <option value="MB Bank">MB Bank</option>
                   </select>
                 </div>
-
                 <div class="form-group">
                   <label for="bank-account">Số tài khoản</label>
                   <input type="text" id="bank-account" class="form-input" placeholder="Nhập số tài khoản" required>
                 </div>
-
                 <div class="form-group">
                   <label for="account-name">Tên chủ tài khoản</label>
                   <input type="text" id="account-name" class="form-input" placeholder="Nhập tên chủ tài khoản" required>
                 </div>
-
                 <div class="form-group">
-                  <label for="withdraw-amount">Số xu muốn rút</label>
+                  <label for="withdraw-amount">Số VNDC muốn rút</label>
                   <div class="amount-input">
-                    <input type="number" id="withdraw-amount" class="form-input" placeholder="Tối thiểu 1,000" min="1000" required>
-                    <span class="input-suffix">💰</span>
+                    <input type="number" id="withdraw-amount" class="form-input" placeholder="Tối thiểu 10" min="10" step="0.1" required>
+                    <span class="input-suffix">💵</span>
                   </div>
-                  <p class="amount-preview">≈ <span id="withdraw-value">0</span> VND (Sau phí)</p>
+                  <p class="amount-preview">≈ <span id="withdraw-value">0</span> VND (Sau phí 2%)</p>
                 </div>
-
                 <button type="submit" class="submit-withdraw">
                   <i class="fas fa-paper-plane"></i>
-                  Gửi yêu cầu rút tiền
+                  Gửi yêu cầu rút VNDC
                 </button>
               </form>
             </div>
           </div>
-
-          <!-- History Content -->
           <div id="history-content" class="account-tab-content">
             <div class="history-list" id="withdraw-history">
               <div class="history-item success">
@@ -375,7 +792,7 @@
                   <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="item-details">
-                  <h4>-5,000 💰</h4>
+                  <h4>-50 VNDC</h4>
                   <p>Vietcombank - 123****890</p>
                   <small>22/12/2024 14:30</small>
                 </div>
@@ -383,13 +800,12 @@
                   Thành công
                 </div>
               </div>
-
               <div class="history-item pending">
                 <div class="item-icon">
                   <i class="fas fa-clock"></i>
                 </div>
                 <div class="item-details">
-                  <h4>-3,000 💰</h4>
+                  <h4>-30 VNDC</h4>
                   <p>BIDV - 987****210</p>
                   <small>23/12/2024 09:15</small>
                 </div>
@@ -397,13 +813,12 @@
                   Đang xử lý
                 </div>
               </div>
-
               <div class="history-item failed">
                 <div class="item-icon">
                   <i class="fas fa-times-circle"></i>
                 </div>
                 <div class="item-details">
-                  <h4>-2,000 💰</h4>
+                  <h4>-20 VNDC</h4>
                   <p>Techcombank - 555****677</p>
                   <small>20/12/2024 16:45</small>
                 </div>
@@ -416,12 +831,14 @@
         </section>
       </div>
     </main>
-
-    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
       <button class="nav-item active" data-tab="khaithac">
         <i class="fas fa-hammer"></i>
         <span>Khai Thác</span>
+      </button>
+      <button class="nav-item" data-tab="traodoi">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Trao Đổi</span>
       </button>
       <button class="nav-item" data-tab="nhiemvu">
         <i class="fas fa-tasks"></i>
@@ -437,12 +854,10 @@
       </button>
     </nav>
   </div>
-
-  <!-- Withdraw Modal -->
   <div id="withdraw-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Yêu cầu rút tiền</h3>
+        <h3>Yêu cầu rút VNDC</h3>
         <button class="close-modal">&times;</button>
       </div>
       <div class="modal-body">
@@ -451,19 +866,16 @@
             <i class="fas fa-check-circle"></i>
           </div>
           <h4>Yêu cầu thành công!</h4>
-          <p>Yêu cầu rút <strong>5,000 💰</strong> của bạn đã được gửi đi.</p>
+          <p>Yêu cầu rút <strong><span id="modal-amount">50</span> 💵</strong> của bạn đã được gửi đi.</p>
           <p>Thời gian xử lý: <strong>1-3 ngày làm việc</strong></p>
           <button class="modal-btn" id="close-withdraw-modal">Đóng</button>
         </div>
       </div>
     </div>
   </div>
-
-   <!-- Toast Notification -->
    <div id="toast" class="toast"></div>
-   
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </body>
 </html>
