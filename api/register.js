@@ -6,7 +6,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  const { username, email, password, referral } = req.body;
+  const { username, email, password} = req.body;
 
   if (!username || !email || !password) {
     return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin.' });
@@ -34,8 +34,7 @@ export default async function handler(req, res) {
         tcd_balance: 0,
         vndc_balance: 0,
         speed_level: 1,
-        production_level: 1,
-        ref_by: referral || null,
+        production_level: 1
       },
     ])
     .select();
