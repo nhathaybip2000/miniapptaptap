@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         vndc_balance: 0,
         speed_level: 1,
         production_level: 1,
-        referral
+        referral: referral || null
       },
     ])
     .select();
