@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
