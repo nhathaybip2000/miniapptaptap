@@ -241,93 +241,272 @@ if (savedUser) {
   }
 }
 
-let miningCooldown = 600;
+// Mining System - Fixed Version
+let miningCooldown = 600; // 10 phút mặc định
 let miningTimer = null;
 let remainingTime = 0;
 let user = JSON.parse(localStorage.getItem("user")) || {};
 let isMiningReady = true;
+
+// Hàm tính toán thời gian hồi chiêu
 function calculateCooldown() {
-  const base = 600; // 10 phút
-  const reduction = (user.speed_level || 1) * 30; // mỗi cấp giảm 30s
-  return Math.max(60, base - reduction); // tối thiểu còn 1 phút
+  const base = 600; // 10 phút = 600 giây
+  const speedLevel = user.speed_level || 1;
+  const reduction = speedLevel * 30; // mỗi cấp giảm 30 giây
+  return Math.max(60, base - reduction); // tối thiểu 1 phút
 }
+
+// Hàm tính toán phản thưởng
 function calculateReward() {
   const base = 100; 
-  const bonus = (user.production_level || 1) * 10;
+  const productionLevel = user.production_level || 1;
+  const bonus = productionLevel * 10;
   return base + bonus;
 }
+
+// Cập nhật giao diện đếm ngược
 function updateCountdownUI(seconds) {
+  const countdownElement = document.getElementById("mining-countdown");
+  if (!countdownElement) return;
+  
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  document.getElementById("mining-countdown").textContent =
+  countdownElement.textContent = 
     `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
+
+// Cập nhật số dư trên giao diện
+function updateBalanceUI() {
+  const balanceElements = [
+    "tcd-balance",
+    "tcd-balance-display", 
+    "account-tcd-balance"
+  ];
+  
+  balanceElements.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = user.tcd_balance || 0;
+    }
+  });
+}
+
+// Bắt đầu thời gian hồi chiêu
 function startMiningCooldown() {
   isMiningReady = false;
-  document.getElementById("start-mining").disabled = true;
+  const miningButton = document.getElementById("start-mining");
+  if (miningButton) {
+    miningButton.disabled = true;
+    miningButton.textContent = "Đang hồi chiêu...";
+  }
+  
   remainingTime = calculateCooldown();
   updateCountdownUI(remainingTime);
+  
+  // Clear timer cũ nếu có
+  if (miningTimer) {
+    clearInterval(miningTimer);
+  }
+  
   miningTimer = setInterval(() => {
     remainingTime--;
     updateCountdownUI(remainingTime);
+    
     if (remainingTime <= 0) {
       clearInterval(miningTimer);
+      miningTimer = null;
       isMiningReady = true;
-      document.getElementById("start-mining").disabled = false;
-      showNotification("Bạn có thể khai thác lại!", "success");
+      
+      const miningButton = document.getElementById("start-mining");
+      if (miningButton) {
+        miningButton.disabled = false;
+        miningButton.textContent = "Bắt đầu khai thác";
+      }
+      
+      // Hiện thông báo
+      if (typeof showNotification === 'function') {
+        showNotification("Bạn có thể khai thác lại!", "success");
+      }
     }
   }, 1000);
 }
-document.getElementById("start-mining").addEventListener("click", () => {
-  if (!isMiningReady) return;
+
+// Xử lý sự kiện khai thác
+function handleMining() {
+  if (!isMiningReady) {
+    if (typeof showNotification === 'function') {
+      showNotification("Vui lòng chờ hết thời gian hồi chiêu!", "error");
+    }
+    return;
+  }
+  
+  // Cập nhật user từ localStorage để đồng bộ
+  const savedUser = localStorage.getItem("user");
+  if (savedUser) {
+    user = JSON.parse(savedUser);
+  }
+  
   const reward = calculateReward();
-  user.tcd_balance += reward;
-  document.getElementById("tcd-balance").textContent = user.tcd_balance;
-  document.getElementById("tcd-balance-display").textContent = user.tcd_balance;
-  document.getElementById("account-tcd-balance").textContent = user.tcd_balance;
-  showNotification(`Khai thác thành công! +${reward} TCD`, "success");
+  user.tcd_balance = (user.tcd_balance || 0) + reward;
+  
+  // Cập nhật giao diện
+  updateBalanceUI();
+  
+  // Hiện thông báo thành công
+  if (typeof showNotification === 'function') {
+    showNotification(`Khai thác thành công! +${reward} TCD`, "success");
+  }
+  
+  // Lưu vào localStorage
   localStorage.setItem("user", JSON.stringify(user));
+  
+  // Bắt đầu hồi chiêu
   startMiningCooldown();
-});
-function initMiningUI() {
-  if (!user || !user.username) return;
-  document.getElementById("speed-level").textContent = user.speed_level || 1;
-  document.getElementById("speed-reduction").textContent = (user.speed_level || 1) * 0.5;
-  document.getElementById("mining-level").textContent = user.production_level || 1;
-  document.getElementById("mining-bonus").textContent = (user.production_level || 1) * 10;
-  document.getElementById("speed-cost").textContent = 500;
-  document.getElementById("mining-cost").textContent = 300;
-  document.getElementById("tcd-balance").textContent = user.tcd_balance || 0;
-  document.getElementById("tcd-balance-display").textContent = user.tcd_balance || 0;
-  document.getElementById("account-tcd-balance").textContent = user.tcd_balance || 0;
-  isMiningReady = true;
-  document.getElementById("start-mining").disabled = false;
 }
 
-document.getElementById("upgrade-speed").addEventListener("click", () => {
-  const cost = 500;
-  if (user.tcd_balance >= cost) {
-    user.tcd_balance -= cost;
-    user.speed_level += 1;
+// Khởi tạo giao diện khai thác
+function initMiningUI() {
+  // Cập nhật user từ localStorage
+  const savedUser = localStorage.getItem("user");
+  if (savedUser) {
+    user = JSON.parse(savedUser);
+  }
+  
+  if (!user || !user.username) return;
+  
+  // Cập nhật thông tin cấp độ
+  const speedLevelElement = document.getElementById("speed-level");
+  if (speedLevelElement) {
+    speedLevelElement.textContent = user.speed_level || 1;
+  }
+  
+  const speedReductionElement = document.getElementById("speed-reduction");
+  if (speedReductionElement) {
+    speedReductionElement.textContent = (user.speed_level || 1) * 0.5;
+  }
+  
+  const miningLevelElement = document.getElementById("mining-level");
+  if (miningLevelElement) {
+    miningLevelElement.textContent = user.production_level || 1;
+  }
+  
+  const miningBonusElement = document.getElementById("mining-bonus");
+  if (miningBonusElement) {
+    miningBonusElement.textContent = (user.production_level || 1) * 10;
+  }
+  
+  // Cập nhật giá nâng cấp
+  const speedCostElement = document.getElementById("speed-cost");
+  if (speedCostElement) {
+    const speedCost = 500 * (user.speed_level || 1);
+    speedCostElement.textContent = speedCost;
+  }
+  
+  const miningCostElement = document.getElementById("mining-cost");
+  if (miningCostElement) {
+    const miningCost = 300 * (user.production_level || 1);
+    miningCostElement.textContent = miningCost;
+  }
+  
+  // Cập nhật số dư
+  updateBalanceUI();
+  
+  // Reset trạng thái khai thác
+  isMiningReady = true;
+  const miningButton = document.getElementById("start-mining");
+  if (miningButton) {
+    miningButton.disabled = false;
+    miningButton.textContent = "Bắt đầu khai thác";
+  }
+  
+  // Clear countdown
+  const countdownElement = document.getElementById("mining-countdown");
+  if (countdownElement) {
+    countdownElement.textContent = "00:00";
+  }
+}
 
-    showNotification("Đã nâng cấp tốc độ!", "success");
+// Nâng cấp tốc độ
+function upgradeSpeed() {
+  const savedUser = localStorage.getItem("user");
+  if (savedUser) {
+    user = JSON.parse(savedUser);
+  }
+  
+  const currentLevel = user.speed_level || 1;
+  const cost = 500 * currentLevel;
+  
+  if ((user.tcd_balance || 0) >= cost) {
+    user.tcd_balance -= cost;
+    user.speed_level = currentLevel + 1;
+    
+    if (typeof showNotification === 'function') {
+      showNotification(`Đã nâng cấp tốc độ lên cấp ${user.speed_level}!`, "success");
+    }
+    
     localStorage.setItem("user", JSON.stringify(user));
     initMiningUI();
   } else {
-    showNotification("Không đủ TCD để nâng cấp!", "error");
+    if (typeof showNotification === 'function') {
+      showNotification(`Không đủ TCD! Cần ${cost} TCD để nâng cấp.`, "error");
+    }
   }
-});
+}
 
-document.getElementById("upgrade-mining").addEventListener("click", () => {
-  const cost = 300;
-  if (user.tcd_balance >= cost) {
+// Nâng cấp sản lượng
+function upgradeProduction() {
+  const savedUser = localStorage.getItem("user");
+  if (savedUser) {
+    user = JSON.parse(savedUser);
+  }
+  
+  const currentLevel = user.production_level || 1;
+  const cost = 300 * currentLevel;
+  
+  if ((user.tcd_balance || 0) >= cost) {
     user.tcd_balance -= cost;
-    user.production_level += 1;
-
-    showNotification("Đã nâng cấp sản lượng!", "success");
+    user.production_level = currentLevel + 1;
+    
+    if (typeof showNotification === 'function') {
+      showNotification(`Đã nâng cấp sản lượng lên cấp ${user.production_level}!`, "success");
+    }
+    
     localStorage.setItem("user", JSON.stringify(user));
     initMiningUI();
   } else {
-    showNotification("Không đủ TCD để nâng cấp!", "error");
+    if (typeof showNotification === 'function') {
+      showNotification(`Không đủ TCD! Cần ${cost} TCD để nâng cấp.`, "error");
+    }
+  }
+}
+
+// Gán sự kiện khi DOM đã sẵn sàng
+document.addEventListener("DOMContentLoaded", () => {
+  // Sự kiện nút khai thác
+  const miningButton = document.getElementById("start-mining");
+  if (miningButton) {
+    miningButton.addEventListener("click", handleMining);
+  }
+  
+  // Sự kiện nâng cấp tốc độ
+  const upgradeSpeedButton = document.getElementById("upgrade-speed");
+  if (upgradeSpeedButton) {
+    upgradeSpeedButton.addEventListener("click", upgradeSpeed);
+  }
+  
+  // Sự kiện nâng cấp sản lượng  
+  const upgradeMiningButton = document.getElementById("upgrade-mining");
+  if (upgradeMiningButton) {
+    upgradeMiningButton.addEventListener("click", upgradeProduction);
   }
 });
+
+// Export functions for global access
+window.MiningSystem = {
+  initMiningUI,
+  handleMining,
+  upgradeSpeed,
+  upgradeProduction,
+  calculateCooldown,
+  calculateReward
+};
