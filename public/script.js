@@ -303,3 +303,31 @@ function initMiningUI() {
   isMiningReady = true;
   document.getElementById("start-mining").disabled = false;
 }
+
+document.getElementById("upgrade-speed").addEventListener("click", () => {
+  const cost = 500;
+  if (user.tcd_balance >= cost) {
+    user.tcd_balance -= cost;
+    user.speed_level += 1;
+
+    showNotification("Đã nâng cấp tốc độ!", "success");
+    localStorage.setItem("user", JSON.stringify(user));
+    initMiningUI();
+  } else {
+    showNotification("Không đủ TCD để nâng cấp!", "error");
+  }
+});
+
+document.getElementById("upgrade-mining").addEventListener("click", () => {
+  const cost = 300;
+  if (user.tcd_balance >= cost) {
+    user.tcd_balance -= cost;
+    user.production_level += 1;
+
+    showNotification("Đã nâng cấp sản lượng!", "success");
+    localStorage.setItem("user", JSON.stringify(user));
+    initMiningUI();
+  } else {
+    showNotification("Không đủ TCD để nâng cấp!", "error");
+  }
+});
