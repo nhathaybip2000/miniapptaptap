@@ -239,3 +239,99 @@ if (savedUser) {
     document.getElementById("account-vndc-balance").textContent = user.vndc_balance;
   }
 }
+
+
+// ==== BIẾN TOÀN CỤC ====
+let miningCooldown = 600; // default 10 phút (600 giây)
+let miningTimer = null;
+let remainingTime = 0;
+let user = JSON.parse(localStorage.getItem("user")) || {};
+let isMiningReady = true;
+
+// ==== TÍNH THỜI GIAN KHAI THÁC DỰA TRÊN SPEED LEVEL ====
+function calculateCooldown() {
+  const base = 600; // 10 phút
+  const reduction = (user.speed_level || 1) * 30; // mỗi cấp giảm 30s
+  return Math.max(60, base - reduction); // tối thiểu còn 1 phút
+}
+
+// ==== TÍNH THƯỞNG TCD DỰA TRÊN PRODUCTION LEVEL ====
+function calculateReward() {
+  const base = 100; // mặc định
+  const bonus = (user.production_level || 1) * 10;
+  return base + bonus;
+}
+
+// ==== CẬP NHẬT GIAO DIỆN THỜI GIAN ====
+function updateCountdownUI(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  document.getElementById("mining-countdown").textContent =
+    `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
+// ==== BẮT ĐẦU ĐẾM NGƯỢC ====
+function startMiningCooldown() {
+  isMiningReady = false;
+  document.getElementById("start-mining").disabled = true;
+
+  remainingTime = calculateCooldown();
+  updateCountdownUI(remainingTime);
+
+  miningTimer = setInterval(() => {
+    remainingTime--;
+    updateCountdownUI(remainingTime);
+
+    if (remainingTime <= 0) {
+      clearInterval(miningTimer);
+      isMiningReady = true;
+      document.getElementById("start-mining").disabled = false;
+      showNotification("Bạn có thể khai thác lại!", "success");
+    }
+  }, 1000);
+}
+
+// ==== NÚT BẮT ĐẦU KHAI THÁC ====
+document.getElementById("start-mining").addEventListener("click", () => {
+  if (!isMiningReady) return;
+
+  const reward = calculateReward();
+  user.tcd_balance += reward;
+
+  // Cập nhật hiển thị
+  document.getElementById("tcd-balance").textContent = user.tcd_balance;
+  document.getElementById("tcd-balance-display").textContent = user.tcd_balance;
+  document.getElementById("account-tcd-balance").textContent = user.tcd_balance;
+
+  showNotification(`Khai thác thành công! +${reward} TCD`, "success");
+
+  // Cập nhật lại vào localStorage
+  localStorage.setItem("user", JSON.stringify(user));
+
+  // Bắt đầu đếm ngược
+  startMiningCooldown();
+});
+
+// ==== LOAD THÔNG TIN LÚC MỞ TRANG ====
+function initMiningUI() {
+  if (!user || !user.username) return;
+
+  // Hiện đúng cấp độ và thưởng
+  document.getElementById("speed-level").textContent = user.speed_level || 1;
+  document.getElementById("speed-reduction").textContent = (user.speed_level || 1) * 0.5;
+
+  document.getElementById("mining-level").textContent = user.production_level || 1;
+  document.getElementById("mining-bonus").textContent = (user.production_level || 1) * 10;
+
+  document.getElementById("speed-cost").textContent = 500;
+  document.getElementById("mining-cost").textContent = 300;
+
+  // Hiện TCD ban đầu
+  document.getElementById("tcd-balance").textContent = user.tcd_balance || 0;
+  document.getElementById("tcd-balance-display").textContent = user.tcd_balance || 0;
+  document.getElementById("account-tcd-balance").textContent = user.tcd_balance || 0;
+
+  // Cho phép khai thác lần đầu
+  isMiningReady = true;
+  document.getElementById("start-mining").disabled = false;
+}
